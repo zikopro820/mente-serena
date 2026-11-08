@@ -296,10 +296,11 @@ async function buscarCliente(code) {   // → { dueno, mascotas:[{id,nombre,espe
     return d ? { dueno: d.dueno, mascotas: d.mascotas, demo: true, agenda: d.mascotas.flatMap(m => (m.citas || []).map(x => ({ mascotaId: m.id, fecha: isoD(x.fecha instanceof Date ? x.fecha : new Date(x.fecha + "T12:00")), estado: "confirmada", paqueteId: x.paquete && m.paquetes[0] ? m.paquetes[0].id : "" }))) } : null; }
   return { dueno: c.dueno, mascotas: Object.entries(c.mascotas || {}).map(([id, m]) => ({ id, ...m })), agenda: Object.entries(L.citas || {}).filter(([, a]) => a.code === code).map(([id, a]) => ({ id, ...a })) };
 }
-async function reservar(base) {   // intenta ocupar un lugar libre del horario; devuelve el id de la cita
+async function reservar(base, pago) {   // intenta ocupar un lugar libre del horario; devuelve el id de la cita
   const cap = Math.max(1, capHora(base.fecha, base.hora)), pub = base.code && base.mascotaId;
   const agenda = { fecha: base.fecha, hora: base.hora, servicio: base.servicio, precio: base.precio, modalidad: base.modalidad, mascota: base.mascota, mascotaId: base.mascotaId, total: base.precio, pagado: 0, estadoPago: "pendiente", estado: "confirmada", creado: base.creado };
   if (base.paqueteId) agenda.paqueteId = base.paqueteId;
+  if (base.adelantoPend) { agenda.adelantoPend = base.adelantoPend; agenda.adelantoEstado = base.adelantoEstado; }
   for (let k = 1; k <= cap; k++) {
     const id = `${base.fecha}_${base.hora}_${k}`;
     if (EN_VIVO) {
@@ -309,6 +310,7 @@ async function reservar(base) {   // intenta ocupar un lugar libre del horario; 
         b.set(fs.doc(db, "turnos", id), { fecha: base.fecha, hora: base.hora, k, creado: base.creado });
         b.set(fs.doc(db, "citas", id), { ...base, k });
         if (pub) b.set(fs.doc(db, "clientes", base.code, "agenda", id), agenda);
+        if (pago) b.set(fs.doc(db, "pagos_web", id), { ...pago, citaId: id });
         await b.commit(); return id;
       } catch (e) { if (!/permission|exists/i.test(e.code || e.message)) throw e; }   // ese lugar ya se ocupó: probamos el siguiente
     } else {
@@ -316,6 +318,7 @@ async function reservar(base) {   // intenta ocupar un lugar libre del horario; 
       if (d.turnos[id]) continue;
       d.turnos[id] = { fecha: base.fecha, hora: base.hora, k, creado: base.creado };
       d.citas[id] = { ...base, k };
+      if (pago) { d.pagos_web = d.pagos_web || {}; d.pagos_web[id] = { ...pago, citaId: id }; }
       store.set("ms_db", d); return id;
     }
   }
@@ -390,8 +393,83 @@ function iniciarCitas(servicios) {
     $("#sHour").textContent = slot || "—";
     $("#sPrice").textContent = PAQ.usar ? "S/ 0 · incluida en tu paquete" : s ? s.dataset.price : "—";
     $(".summary .sum-total").classList.toggle("paq", !!PAQ.usar);
+    let fa = $("#sAdl"); if (!fa) { $(".summary .sum-total").insertAdjacentHTML("afterend", `<div class="sum-row adl-row" id="sAdl"><span>Adelanto</span><b></b></div>`); fa = $("#sAdl"); }
+    const am = typeof ADL !== "undefined" && ADL.si && !PAQ.usar ? +($("#adlMonto") || {}).value || 0 : 0;
+    fa.hidden = !am; if (am) fa.querySelector("b").textContent = `${precio(am)} · saldo ${precio(Math.max((+(($("input[name=servicio]:checked", book) || {}).dataset?.p || 0)) - am, 0))}`;
   }
   book.addEventListener("input", updateSum); book.addEventListener("change", updateSum);
+
+  /* ---- Adelanto con Yape o Plin (el paciente elige) ---- */
+  const ADL = { si: false, met: "", img: "", ocr: null, leyendo: false };
+  const adlBox = document.createElement("div"); adlBox.id = "adlBox";
+  $("[name=nombre]", book).closest(".f-grid").previousElementSibling.before(adlBox);
+  const metodos = () => [AJ.pagoYape !== false && AJ.yapeQR ? "Yape" : "", AJ.pagoPlin !== false && AJ.plinQR ? "Plin" : ""].filter(Boolean);
+  const precioSel = () => +(($("input[name=servicio]:checked", book) || {}).dataset?.p || 0);
+  const minAdl = () => { const p = precioSel(), v = +AJ.adelantoValor || 0, m = AJ.adelantoTipo === "porcentaje" ? Math.round(p * v / 100) : v; return p ? Math.min(m, p) : m; };
+  const qrDe = m => m === "Plin" ? { qr: AJ.plinQR, num: AJ.plinNum, tit: AJ.plinTitular } : { qr: AJ.yapeQR, num: AJ.yapeNum, tit: AJ.yapeTitular };
+  function pintarAdl() {
+    const mets = metodos(), p = precioSel();
+    if (!mets.length || !p || PAQ.usar) { adlBox.innerHTML = ""; ADL.si = false; return updateSum(); }
+    if (!ADL.met || !mets.includes(ADL.met)) ADL.met = mets[0];
+    if (AJ.adelantoObligatorio) ADL.si = true;
+    const q = qrDe(ADL.met), min = minAdl(), monto = $("#adlMonto") ? $("#adlMonto").value : min;
+    adlBox.innerHTML = `<span class="f-label">${AJ.adelantoObligatorio ? "Adelanto para reservar *" : "¿Quieres dejar un adelanto?"}</span>
+      ${AJ.adelantoObligatorio ? "" : `<div class="mods adl-op"><label class="mod"><input type="radio" name="adlOp" value="si" ${ADL.si ? "checked" : ""}><span>${ICO.check}<b>Adelantar ahora</b><small>Con ${mets.join(" o ")} · desde ${precio(min)}</small></span></label>
+        <label class="mod"><input type="radio" name="adlOp" value="no" ${ADL.si ? "" : "checked"}><span>${icono("home")}<b>Pagar en el consultorio</b><small>${/online/i.test(($("input[name=modalidad]:checked", book) || {}).value || "") ? "O antes de tu sesión online" : "El día de tu cita"}</small></span></label></div>`}
+      <div class="adl" ${ADL.si ? "" : "hidden"}>
+        ${mets.length > 1 ? `<div class="adl-tabs">${mets.map(m => `<button type="button" class="adl-tab ${m === ADL.met ? "on" : ""} ${m.toLowerCase()}" data-met="${m}">${m}</button>`).join("")}</div>` : ""}
+        <div class="adl-qr ${ADL.met.toLowerCase()}">
+          <img src="${esc(q.qr)}" alt="Código QR de ${ADL.met}">
+          <div><b>1. Escanea el QR con ${ADL.met}</b><span>o ${ADL.met === "Plin" ? "plinea" : "yapea"} al número:</span><div class="adl-num"><b>${esc(q.num || "")}</b><button type="button" class="btn btn-light btn-sm" data-copynum="${esc(String(q.num || "").replace(/\D/g, ""))}">Copiar</button></div><small>A nombre de <b>${esc(q.tit || NOMBRE)}</b></small></div>
+        </div>
+        <div class="f-grid adl-g">
+          <label class="adl-l">2. ¿Cuánto adelantas? <small>(mínimo ${precio(min)} · total ${precio(p)})</small><input type="number" id="adlMonto" min="${min}" max="${p}" step="0.1" value="${esc(monto)}" inputmode="decimal"></label>
+          <label class="adl-l">3. Sube la captura del pago<span class="adl-up ${ADL.img ? "ok" : ""}"><input type="file" id="adlFile" accept="image/*">${ADL.img ? `<img src="${ADL.img}" alt="Captura del pago">` : `${icono("file")} Elegir imagen`}</span></label>
+        </div>
+        <div class="adl-ocr" id="adlOcr"></div>
+        <label class="adl-l">Número de operación <small>(lo leemos de tu captura; corrígelo si hace falta)</small><input id="adlOp" maxlength="14" inputmode="numeric" placeholder="Ej. 12345678" value="${esc((ADL.ocr && ADL.ocr.op) || "")}"></label>
+        <p class="adl-note">${icono("lock")} Recepción confirma tu adelanto en minutos y te avisa por WhatsApp. Lo verás en Mi Espacio.</p>
+      </div>`;
+    revisarOCR(); updateSum();
+  }
+  function revisarOCR() {
+    const box = $("#adlOcr"); if (!box) return;
+    if (ADL.leyendo) { box.className = "adl-ocr"; box.innerHTML = `<span class="spin"></span> Leyendo tu captura…`; return; }
+    if (!ADL.img) { box.innerHTML = ""; return; }
+    const o = ADL.ocr, m = +($("#adlMonto") || {}).value || 0;
+    if (!o || !o.montos.length) { box.className = "adl-ocr warn"; box.innerHTML = `${icono("file")} No pudimos leer el monto de la captura. No te preocupes: recepción la revisará.`; return; }
+    o.coincide = o.montos.some(x => Math.abs(x - m) < 0.01);
+    box.className = "adl-ocr " + (o.coincide ? "ok" : "bad");
+    box.innerHTML = o.coincide ? `${ICO.check} El monto de tu captura (${precio(m)}) coincide.${o.fechaOk === false ? " <b>Ojo: la fecha de la captura no es de hoy.</b>" : ""}`
+      : `${icono("lifebuoy")} Tu captura dice <b>${o.montos.map(precio).join(" / ")}</b> y escribiste <b>${precio(m)}</b>. Corrige el monto o sube la captura correcta.
+         <label class="adl-chk"><input type="checkbox" id="adlForzar"> Mi captura es correcta, que recepción la revise</label>`;
+  }
+  async function leerCaptura(src) {   // lectura automática del texto de la captura (en el celular)
+    if (AJ.adelantoOCR === false) return null;
+    if (!window.Tesseract) await new Promise((ok, no) => { const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
+    const r = await Promise.race([window.Tesseract.recognize(src, "spa"), new Promise((_, no) => setTimeout(() => no(new Error("tiempo")), 30000))]);
+    const t = (r && r.data && r.data.text) || "";
+    const montos = [...new Set([...t.matchAll(/S\s*\/\.?\s*(\d{1,4}(?:[.,]\d{1,2})?)/gi)].map(x => +x[1].replace(",", ".")).filter(x => x > 0))];
+    const op = (t.match(/operaci[oó]n\D{0,25}(\d{6,14})/i) || t.match(/\b(\d{8})\b/) || [])[1] || "";
+    const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "set", "oct", "nov", "dic"], fm = t.match(/(\d{1,2})\s*(?:de\s*)?(ene|feb|mar|abr|may|jun|jul|ago|set|sep|oct|nov|dic)[a-z]*\.?\s*(?:de\s*)?(\d{4})?/i);
+    let fechaOk = null; if (fm) { const mi = MESES.indexOf(fm[2].toLowerCase().replace("sep", "set")), d = new Date(), ay = new Date(Date.now() - 864e5); fechaOk = [d, ay].some(x => x.getDate() === +fm[1] && x.getMonth() === mi); }
+    return { montos, op, fechaOk, texto: t.slice(0, 400) };
+  }
+  function comprimir(file) { return new Promise((ok, no) => { const fr = new FileReader(); fr.onerror = no; fr.onload = () => { const im = new Image(); im.onerror = no; im.onload = () => {
+    const k = Math.min(1, 1100 / Math.max(im.width, im.height)), c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+    c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); let q = .75, u = c.toDataURL("image/jpeg", q); while (u.length > 650000 && q > .35) { q -= .1; u = c.toDataURL("image/jpeg", q); } ok(u); }; im.src = fr.result; }; fr.readAsDataURL(file); }); }
+  adlBox.addEventListener("change", async e => {
+    if (e.target.name === "adlOp") { ADL.si = e.target.value === "si"; return pintarAdl(); }
+    if (e.target.id === "adlFile") { const f = e.target.files[0]; if (!f) return;
+      try { ADL.img = await comprimir(f); } catch (er) { return toast("No se pudo abrir esa imagen"); }
+      ADL.ocr = null; ADL.leyendo = true; pintarAdl();
+      try { ADL.ocr = await leerCaptura(ADL.img); } catch (er) { console.warn("Lectura de captura:", er.message); ADL.ocr = null; }
+      ADL.leyendo = false; const opIn = $("#adlOp"), keep = opIn ? opIn.value : ""; pintarAdl(); if (ADL.ocr && ADL.ocr.op && !keep) $("#adlOp").value = ADL.ocr.op; }
+  });
+  adlBox.addEventListener("input", e => { if (e.target.id === "adlMonto") { revisarOCR(); updateSum(); } });
+  adlBox.addEventListener("click", e => { const t = e.target.closest("[data-met]"); if (t) { ADL.met = t.dataset.met; return pintarAdl(); }
+    const c = e.target.closest("[data-copynum]"); if (c) { navigator.clipboard?.writeText(c.dataset.copynum).then(() => toast("Número copiado"), () => {}); } });
+  book.addEventListener("change", e => { if (e.target.name === "servicio" || e.target.name === "modalidad" || e.target.id === "usarPaq") setTimeout(pintarAdl, 0); });
 
   /* ---- Paquete de sesiones (pagado por adelantado) ---- */
   const PAQ = { p: null, disp: 0, usar: false };
@@ -417,13 +495,14 @@ function iniciarCitas(servicios) {
       <small>${esc(vig.t)}${reservadas ? ` · ya tienes ${reservadas} reservada(s)` : ""}${vig.vence ? ` · vence el ${nice(String(vig.vence).slice(0, 10))}` : ""}. Esta cita no se paga: ya está pagada.</small></div><span class="paq-cero">S/ 0</span></label><p class="paq-warn" id="paqWarn"></p>`;
     PAQ.usar = true; ajustarPaq(true);
   }
+  const _ajustarPaq0 = () => setTimeout(() => typeof pintarAdl === "function" && pintarAdl(), 0);
   // el paquete es para un servicio: si eligen otro, se cobra normal
   function ajustarPaq(elegir) {
     const chk = $("#usarPaq"); if (!PAQ.p || !chk) return updateSum();
     const s = $("input[name=servicio]:checked", book), quiere = chk.checked;
     if (quiere && PAQ.p.servicio && elegir) { const r = $$("input[name=servicio]", book).find(x => x.dataset.key === PAQ.p.servicio); if (r && r !== s) { r.checked = true; llenarPros(); revisarModalidad(); drawSlots(); } }
     const s2 = $("input[name=servicio]:checked", book), vale = !PAQ.p.servicio ? (s2 && s2.dataset.area !== "psiquiatria") : (s2 && s2.dataset.key === PAQ.p.servicio);
-    PAQ.usar = quiere && vale;
+    PAQ.usar = quiere && vale; _ajustarPaq0();
     const w = $("#paqWarn"); if (w) w.textContent = quiere && !vale ? "Tu paquete no incluye este servicio: esta cita se paga aparte." : "";
     chk.closest(".paq-msg").classList.toggle("dim", !PAQ.usar);
     updateSum();
@@ -473,7 +552,7 @@ function iniciarCitas(servicios) {
   if (ps.get("modalidad") === "Online") { const r = $$("input[name=servicio]", book).find(x => x.dataset.online !== "0"); const cur = $("input[name=servicio]:checked", book); if (cur && cur.dataset.online === "0" && r) r.checked = true; $("input[name=modalidad][value=Online]", book).checked = true; }
   llenarPros(); revisarModalidad();
   if (ps.get("codigo")) { codeIn.value = ps.get("codigo"); verCodigo(); }
-  drawSlots();
+  drawSlots(); pintarAdl();
 
   book.addEventListener("submit", async e => {
     e.preventDefault();
@@ -490,6 +569,18 @@ function iniciarCitas(servicios) {
     }
     const v = n => ($(`[name="${n}"]`, book)?.value || "").trim();
     const s = $("input[name=servicio]:checked", book);
+    let pago = null;
+    if (ADL.si && !PAQ.usar && $("#adlMonto")) {
+      const monto = Math.round((+$("#adlMonto").value || 0) * 100) / 100, min = minAdl(), p = precioSel();
+      const err = t => { msg.className = "f-msg err"; msg.textContent = t; adlBox.scrollIntoView({ behavior: "smooth", block: "center" }); };
+      if (!(monto >= min) || monto > p) return err(`El adelanto debe ser entre ${precio(min)} y ${precio(p)}.`);
+      if (!ADL.img) return err("Sube la captura de tu pago para dejar el adelanto (o elige «Pagar en el consultorio»).");
+      if (ADL.leyendo) return err("Espera un momento: estamos leyendo tu captura.");
+      if (ADL.ocr && ADL.ocr.montos.length && !ADL.ocr.coincide && !($("#adlForzar") || {}).checked) return err("El monto no coincide con tu captura. Corrígelo o marca que tu captura es correcta.");
+      pago = { monto, metodo: ADL.met, operacion: ($("#adlOp").value || "").replace(/\D/g, "").slice(0, 14), captura: ADL.img,
+        montoLeido: ADL.ocr && ADL.ocr.montos.length ? ADL.ocr.montos[0] : null, montosLeidos: ADL.ocr ? ADL.ocr.montos.slice(0, 5) : [], coincide: ADL.ocr ? !!ADL.ocr.coincide : null, fechaOk: ADL.ocr ? ADL.ocr.fechaOk : null,
+        estado: "por-validar", creado: new Date().toISOString() };
+    }
     const cita = {
       fecha: dateIn.value, hora: slot, servicioId: s.dataset.key, servicio: s.value, precio: +s.dataset.p || 0, modalidad: ($("input[name=modalidad]:checked", book) || {}).value || "Presencial", area: s.dataset.area || "psicologia",
       code: cliente ? cliente.code : "", mascotaId: cliente ? v("mascotaId") : "", mascota: v("mascota").slice(0, 60),
@@ -498,9 +589,11 @@ function iniciarCitas(servicios) {
       origen: "web", estado: "confirmada", pagado: 0, estadoPago: "pendiente", creado: new Date().toISOString(),
     };
     if (PAQ.usar && PAQ.p && cita.code && cita.mascotaId) { cita.precio = 0; cita.paqueteId = PAQ.p.id; }
+    if (pago) { cita.adelantoPend = pago.monto; cita.adelantoMetodo = pago.metodo; cita.adelantoEstado = "por-validar";
+      Object.assign(pago, { code: cita.code, mascota: cita.mascota, dueno: cita.dueno, celular: cita.celular, servicio: cita.servicio, fecha: cita.fecha, hora: cita.hora, precio: cita.precio }); }
     btn.disabled = true; msg.className = "f-msg"; msg.textContent = "Reservando…";
     let id = null;
-    try { id = await reservar(cita); } catch (err) { console.error(err); }
+    try { id = await reservar(cita, pago); } catch (err) { console.error(err); }
     btn.disabled = false;
     if (!id) { msg.className = "f-msg err"; msg.textContent = "Ese horario se acaba de llenar o no pudimos conectar. Elige otro horario."; drawSlots(); return; }
     const txt = ["Hola, acabo de reservar una cita en la web:", "",
@@ -509,6 +602,7 @@ function iniciarCitas(servicios) {
     if (cita.preferencia) txt.push(`• Profesional de preferencia: ${cita.preferencia}`);
     if (cita.code) txt.push(`• Código de paciente: ${cita.code}`);
     if (cita.paqueteId) txt.push(`• Uso mi paquete: ${PAQ.p.t} (me quedarán ${PAQ.disp - 1} disponibles)`);
+    if (pago) txt.push(`• Adelanto: ${precio(pago.monto)} por ${pago.metodo}${pago.operacion ? " (operación " + pago.operacion + ")" : ""} · subí la captura en la web`);
 
     book.hidden = true;
     const ok = $("#bookOk"); ok.hidden = false;
@@ -516,6 +610,7 @@ function iniciarCitas(servicios) {
       <div class="ok-box"><div><span>Servicio</span><b>${esc(cita.servicio)}</b></div><div><span>Modalidad</span><b>${esc(cita.modalidad)}</b></div><div><span>Fecha</span><b>${esc(nice(cita.fecha))}</b></div>
       <div><span>Hora</span><b>${esc(cita.hora)} h</b></div><div><span>Paciente</span><b>${esc(cita.mascota)}</b></div>
       <div><span>Precio</span><b>${cita.paqueteId ? "S/ 0 · incluida en tu paquete" : cita.precio ? precio(cita.precio) : "A consultar"}</b></div>
+      ${pago ? `<div class="full adl-okbox"><span>Adelanto</span><b>${precio(pago.monto)} por ${esc(pago.metodo)} · en validación</b><small>Recepción revisará tu captura y te confirmará por WhatsApp. Saldo a pagar: ${precio(Math.max(cita.precio - pago.monto, 0))}.</small></div>` : ""}
       <div class="full"><span>${cita.modalidad === "Online" ? "¿Cómo me conecto?" : "Te esperamos en"}</span><b>${cita.modalidad === "Online" ? "Te enviaremos el enlace de la videollamada por WhatsApp" + (cita.code ? " y aparecerá en Mi Espacio" : "") : esc(AJ.direccion)}</b></div></div>
       <p class="sub-ok">${cita.modalidad === "Online" ? "Busca un lugar privado y tranquilo, con buena conexión." : "Llega 10 minutos antes."} ${cita.code ? "También la verás en <b>Mi Espacio</b> con tu código." : "En tu primera sesión te daremos tu código para entrar a Mi Espacio."}</p>
       <div class="hero-actions"><button class="btn btn-pri" id="okWa">${ICO.check} Avisar por WhatsApp</button>${cita.code ? `<a class="btn btn-light" href="mi-espacio?codigo=${esc(cita.code)}">Ver en Mi Espacio</a>` : ""}<a class="btn btn-light" href="citas">Reservar otra</a></div>`;
@@ -597,6 +692,8 @@ if (portal) {
     if (pagado > 0) return `<span class="st warn">Adelanto ${soles(pagado)} · Saldo ${soles(Math.max(total - pagado, 0))}</span>`;
     return total ? `<span class="st bad">Pago pendiente · ${soles(total)}</span>` : `<span class="st">Sin costo</span>`;
   };
+  const pagoCita = c => c.adelantoEstado === "por-validar" ? `<span class="st warn">Adelanto ${soles(c.adelantoPend)} en revisión</span>`
+    : c.adelantoEstado === "rechazado" ? `<span class="st bad">Adelanto no validado · escríbenos</span>` : pagoTxt(c.total, c.pagado, c.paquete);
   let cli = null, code = "", idx = 0, timer = null;
 
   function normal(c, pacs, agenda) {   // formato del panel → formato de esta página
@@ -703,7 +800,7 @@ if (portal) {
       $("#nextBox").innerHTML = `
         <div><small>PRÓXIMA SESIÓN · ${enDias(diff(d)).toUpperCase()}</small><h3>${esc(pr.servicio)}</h3>
           <p>${DIA[d.getDay()]} ${fmt(d)} · <b>${esc(pr.hora)} h</b><br>${pr.vet ? "Con: <b>" + esc(pr.vet) + "</b>" : "Profesional por confirmar"} · ${modIco(pr.modalidad)} ${esc(pr.modalidad || "Presencial")}</p>
-          ${+pr.total || +pr.pagado || pr.paquete ? `<div class="pay-line">${pagoTxt(pr.total, pr.pagado, pr.paquete)}</div>` : ""}</div>
+          ${+pr.total || +pr.pagado || pr.paquete || pr.adelantoEstado ? `<div class="pay-line">${pagoCita(pr)}</div>` : ""}</div>
         <div class="countdown" id="cd"></div>
         <div class="next-actions">
           ${online ? (pr.enlace ? `<a class="btn btn-white" href="${esc(pr.enlace)}" target="_blank" rel="noopener">${icono("video")} Entrar a la videollamada</a>` : `<span class="join-wait">${icono("video")} El enlace aparecerá aquí antes de tu sesión</span>`) : ""}
@@ -720,7 +817,7 @@ if (portal) {
         <div class="next-actions"><a class="btn btn-white" href="citas?codigo=${encodeURIComponent(code)}">Agendar sesión</a></div>`;
     }
     $("#citasCard").style.display = m.citas.length > 1 ? "" : "none";
-    $("#citasList").innerHTML = m.citas.map(c => `<div class="vac"><div><b>${esc(c.servicio)}</b><small>${DIA[c.fecha.getDay()]} ${fmt(c.fecha)} · ${esc(c.hora)} h · ${esc(c.modalidad || "Presencial")}${c.vet ? " · " + esc(c.vet) : ""}</small></div>${pagoTxt(c.total, c.pagado, c.paquete)}</div>`).join("");
+    $("#citasList").innerHTML = m.citas.map(c => `<div class="vac"><div><b>${esc(c.servicio)}</b><small>${DIA[c.fecha.getDay()]} ${fmt(c.fecha)} · ${esc(c.hora)} h · ${esc(c.modalidad || "Presencial")}${c.vet ? " · " + esc(c.vet) : ""}</small></div>${pagoCita(c)}</div>`).join("");
     // Pagos y recibos
     const pag = m.historial.filter(h => +h.monto > 0 || +h.pagado > 0);
     const totalPag = pag.reduce((a, h) => a + (+h.pagado || 0), 0), saldo = pag.reduce((a, h) => a + Math.max((+h.monto || 0) - (+h.pagado || 0), 0), 0);
