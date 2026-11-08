@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mente Serena | Psiquiatría y Psicología en Lima y online</title>
+  <meta name="description" content="Centro de psiquiatría y psicología en Miraflores, Lima: terapia individual, de pareja, familiar, infantil y psiquiatría. Sesiones presenciales u online con total confidencialidad.">
+  <meta name="theme-color" content="#3d6b63">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="firebase-config.js"></script>
+  <script src="datos.js"></script>
+  <script src="script.js" defer></script>
+</head>
+<body class="dental serena">
+  <div class="demo-note demo-only">Sitio de demostración creado por <a href="https://ziko.pro" target="_blank" rel="noopener"><b>ziko.pro</b></a> · Los datos y precios son de ejemplo.</div>
+  <div class="topbar">
+    <div class="container">
+      <span data-emerg><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M4.9 4.9l4.3 4.3M14.8 14.8l4.3 4.3M14.8 9.2l4.3-4.3M4.9 19.1l4.3-4.3"/></svg> <b><span data-t="top.emerg">¿En crisis? Llama gratis:</span></b> <a href="tel:113" data-crisis-tel>Línea 113, opción 5</a></span>
+      <span class="hide-m"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span data-aj="horario">Lun a Sáb 8:00 – 21:00 · Dom cerrado</span></span>
+      <span class="hide-m"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> <span><span data-t="top.online">Sesiones online para todo el Perú</span></span></span>
+    </div>
+  </div>
+  <header>
+    <div class="container nav">
+      <a href="./" class="brand" data-brand aria-label="Inicio"><span class="paw"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-4.5-2.5-8-6.4-8-10.5A4.5 4.5 0 0 1 12 8a4.5 4.5 0 0 1 8 2.5c0 4.1-3.5 8-8 10.5z" fill="none" stroke="#fff" stroke-width="2"/><path d="M12 8c0-3 1.5-5 4-5-.2 2.6-1.6 4.3-4 5z" fill="#fff"/></svg></span><span>Mente<b> Serena</b><small>Psiquiatría y Psicología</small></span></a>
+      <ul class="menu" id="menu">
+        <li><a href="./" data-nav="inicio" class="active" aria-current="page">Inicio</a></li>
+        <li><a href="servicios" data-nav="servicios">Servicios</a></li>
+        <li><a href="especialistas" data-nav="especialistas">Especialistas</a></li>
+        <li><a href="citas" data-nav="citas">Reservar</a></li>
+        <li><a href="mi-espacio" data-nav="mi-espacio">Mi Espacio</a></li>
+        <li><a href="nosotros" data-nav="nosotros">Nosotros</a></li>
+        <li><a href="contacto" data-nav="contacto">Contacto</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="citas" class="btn btn-coral btn-sm"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="btn-txt"><span data-t="nav.cta">Agendar cita</span></span></a>
+        <button class="hamburger" id="hamburger" aria-label="Abrir menú" aria-expanded="false"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="reveal">
+        <span class="pill coral"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20A7 7 0 0 1 4 13c0-6 6-10 16-10 0 10-4 16-10 16"/><path d="M4 21c3-6 7-9 12-11"/></svg> <span id="hTag">Psiquiatría y psicología · Miraflores y online</span></span>
+        <h1 id="hTitle">Un lugar seguro para <span>sentirte mejor</span></h1>
+        <p class="lead" id="hText">Psiquiatras y psicólogos trabajando en equipo para cuidar tu salud mental. Sesiones presenciales u online, con total confidencialidad, y tu proceso siempre a la mano en Mi Espacio.</p>
+        <div class="hero-actions">
+          <a href="citas" class="btn btn-pri"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> <span data-t="ini.b1">Agendar mi primera cita</span></a>
+          <a href="especialistas" class="btn btn-light"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M1 21a8 8 0 0 1 16 0M17 4a4 4 0 0 1 0 8M23 21a8 8 0 0 0-5-7.4"/></svg> <span data-t="ini.b2">Conocer al equipo</span></a>
+        </div>
+        <div class="hero-trust" id="hCifras">
+          <div><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M8.2 13.4L7 22l5-3 5 3-1.2-8.6"/></svg></i><div><b>12 años</b>acompañando personas</div></div>
+          <div><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg></i><div><b>Online</b>desde todo el Perú</div></div>
+          <div><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></i><div><b>100%</b>confidencial</div></div>
+        </div>
+      </div>
+      <div class="hero-visual reveal">
+        <div class="hero-photo" id="hPhoto"><span class="hero-ph"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-4.5-2.5-8-6.4-8-10.5A4.5 4.5 0 0 1 12 8a4.5 4.5 0 0 1 8 2.5c0 4.1-3.5 8-8 10.5z" fill="none" stroke="#fff" stroke-width="2"/><path d="M12 8c0-3 1.5-5 4-5-.2 2.6-1.6 4.3-4 5z" fill="#fff"/></svg></span><img src="https://images.unsplash.com/photo-1758273241086-f3585ef8c2f8?auto=format&fit=crop&w=1000&q=80" alt="Psicóloga escuchando a una paciente" onerror="this.remove()"></div>
+        <div class="float-card c1"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M16 8l-2 6-6 2 2-6z"/></svg></i><div><b><span data-t="ini.f1t">Consulta de orientación</span></b><small><span data-t="ini.f1s">Desde S/ 60 · 30 min</span></small></div></div>
+        <div class="float-card c2"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg></i><div><b><span data-t="ini.f2t">Sesión online</span></b><small><span data-t="ini.f2s">Hoy · 19:00 h · desde casa</span></small></div></div>
+        <div class="float-card c3"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></i><div><b><span data-t="ini.f3t">100% confidencial</span></b><small><span data-t="ini.f3s">Secreto profesional</span></small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container quick" data-sec="accesos">
+    <div class="quick-box reveal">
+      <a href="citas"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></i><div><b><span data-t="ini.a1t">Agendar cita</span></b><span><span data-t="ini.a1s">Presencial u online</span></span></div></a>
+      <a href="mi-espacio"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg></i><div><b><span data-t="ini.a2t">Mi Espacio</span></b><span><span data-t="ini.a2s">Tus sesiones con tu código</span></span></div></a>
+      <a href="especialistas"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M1 21a8 8 0 0 1 16 0M17 4a4 4 0 0 1 0 8M23 21a8 8 0 0 0-5-7.4"/></svg></i><div><b><span data-t="ini.a3t">Especialistas</span></b><span><span data-t="ini.a3s">Elige con quién atenderte</span></span></div></a>
+      <a href="#" data-crisis data-emerg><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M4.9 4.9l4.3 4.3M14.8 14.8l4.3 4.3M14.8 9.2l4.3-4.3M4.9 19.1l4.3-4.3"/></svg></i><div><b><span data-t="ini.a4t">Ayuda inmediata</span></b><span><span data-t="ini.a4s">Si estás en crisis</span></span></div></a>
+    </div>
+  </div>
+
+  <section data-sec="temas">
+    <div class="container">
+      <div class="sec-head center reveal"><span class="pill mint"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg> Te podemos ayudar</span><h2>¿Te sientes <span class="c-pri">así?</span></h2>
+        <p>No tienes que estar "muy mal" para pedir ayuda. Estos son algunos temas que acompañamos todos los días.</p></div>
+      <div class="temas">
+        <a class="tema reveal" href="citas?servicio=orientacion"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></i><span><span data-t="tema.1">Ansiedad y ataques de pánico</span></span></a>
+        <a class="tema reveal" href="citas?servicio=orientacion"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 19H8a6 6 0 1 1 1.3-11.9A5 5 0 0 1 19 9a5 5 0 0 1-1.5 10z"/></svg></i><span><span data-t="tema.2">Tristeza o depresión</span></span></a>
+        <a class="tema reveal" href="citas?servicio=orientacion"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a7 7 0 0 0 7-7c0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-2 2-5 5-5 8a7 7 0 0 0 7 7z"/></svg></i><span><span data-t="tema.3">Estrés y agotamiento laboral</span></span></a>
+        <a class="tema reveal" href="citas?servicio=orientacion"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg></i><span><span data-t="tema.4">Duelo y pérdidas</span></span></a>
+        <a class="tema reveal" href="citas?servicio=orientacion"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 14a5 5 0 0 0 8 0M9 9h.01M15 9h.01"/></svg></i><span><span data-t="tema.5">Autoestima e inseguridad</span></span></a>
+        <a class="tema reveal" href="citas?servicio=orientacion"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="7" r="3"/><circle cx="16" cy="7" r="3"/><path d="M2 21a6 6 0 0 1 12 0M10 21a6 6 0 0 1 12 0"/></svg></i><span><span data-t="tema.6">Problemas de pareja</span></span></a>
+        <a class="tema reveal" href="citas?servicio=orientacion"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></i><span><span data-t="tema.7">Insomnio y sueño</span></span></a>
+        <a class="tema reveal" href="citas?servicio=orientacion"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4 4 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></i><span><span data-t="tema.8">Crianza y conducta infantil</span></span></a>
+        <a class="tema reveal" href="citas?servicio=orientacion"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></i><span><span data-t="tema.9">TDAH y concentración</span></span></a>
+        <a class="tema reveal" href="citas?servicio=orientacion"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="3"/><path d="M12 8v14M5 12H2a10 10 0 0 0 20 0h-3"/></svg></i><span><span data-t="tema.10">Adicciones</span></span></a>
+        <a class="tema reveal" href="citas?servicio=orientacion"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 8h1a4 4 0 0 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg></i><span><span data-t="tema.11">Relación con la comida</span></span></a>
+        <a class="tema reveal" href="citas?servicio=orientacion"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></i><span><span data-t="tema.12">Trauma y experiencias difíciles</span></span></a>
+      </div>
+      <p class="temas-cta reveal"><span data-t="tema.cta">¿No sabes qué tipo de ayuda necesitas?</span> <a href="citas?servicio=orientacion"><span data-t="tema.ctaL">Agenda una consulta de orientación</span> <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+    </div>
+  </section>
+
+  <section data-sec="servicios">
+    <div class="container">
+      <div class="head-row">
+        <div class="sec-head reveal">
+          <span class="pill"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20A7 7 0 0 1 4 13c0-6 6-10 16-10 0 10-4 16-10 16"/><path d="M4 21c3-6 7-9 12-11"/></svg> Servicios</span>
+          <h2>Psiquiatría y psicología <span class="c-pri">en un solo lugar</span></h2>
+          <p>Para adultos, parejas, familias, niños y adolescentes.</p>
+        </div>
+        <a href="servicios" class="btn btn-light reveal"><span data-t="ini.svbtn">Ver todos los servicios</span> <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="services" id="svcMain" data-limit="6">
+        <article class="svc reveal">
+          <a class="svc-img" href="servicio?id=orientacion"><img src="https://images.unsplash.com/photo-1758273241078-8eec353836be?auto=format&fit=crop&w=700&q=80" alt="Primera consulta de orientación" loading="lazy" onerror="this.remove()"><span class="ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M16 8l-2 6-6 2 2-6z"/></svg></span><span class="svc-on"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> Online</span></a>
+          <div class="svc-body"><h3><a href="servicio?id=orientacion">Primera consulta de orientación</a></h3><p>Si no sabes por dónde empezar, conversamos y te recomendamos el tipo de ayuda y el profesional ideal.</p>
+            <div class="svc-foot"><div class="price"><small>30 min</small><b>S/ 60</b></div><a href="servicio?id=orientacion" class="btn btn-light btn-sm">Ver más <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+          </div>
+        </article>
+        <article class="svc reveal">
+          <a class="svc-img" href="servicio?id=terapia-individual"><img src="https://images.unsplash.com/photo-1758273240631-59d44c8f5b66?auto=format&fit=crop&w=700&q=80" alt="Terapia individual para adultos" loading="lazy" onerror="this.remove()"><span class="ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/></svg></span><span class="svc-on"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> Online</span></a>
+          <div class="svc-body"><h3><a href="servicio?id=terapia-individual">Terapia individual para adultos</a></h3><p>Un espacio seguro para trabajar ansiedad, tristeza, estrés, duelo, autoestima o lo que te preocupe.</p>
+            <div class="svc-foot"><div class="price"><small>50 min</small><b>S/ 110</b></div><a href="servicio?id=terapia-individual" class="btn btn-light btn-sm">Ver más <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+          </div>
+        </article>
+        <article class="svc reveal">
+          <a class="svc-img" href="servicio?id=consulta-psiquiatrica"><img src="https://images.unsplash.com/photo-1714976694810-85add1a29c96?auto=format&fit=crop&w=700&q=80" alt="Consulta psiquiátrica" loading="lazy" onerror="this.remove()"><span class="ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 1 5 3 3 0 0 0 4 4 2 2 0 0 0 3-1V5a2 2 0 0 0-3-2z"/><path d="M15 3a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-1 5 3 3 0 0 1-4 4 2 2 0 0 1-3-1"/></svg></span><span class="svc-on"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> Online</span></a>
+          <div class="svc-body"><h3><a href="servicio?id=consulta-psiquiatrica">Consulta psiquiátrica</a></h3><p>Evaluación médica de la salud mental: diagnóstico y, si hace falta, tratamiento con medicación.</p>
+            <div class="svc-foot"><div class="price"><small>60 min</small><b>S/ 180</b></div><a href="servicio?id=consulta-psiquiatrica" class="btn btn-light btn-sm">Ver más <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+          </div>
+        </article>
+        <article class="svc reveal">
+          <a class="svc-img" href="servicio?id=control-psiquiatrico"><img src="https://images.unsplash.com/photo-1714976694756-28bf07af3758?auto=format&fit=crop&w=700&q=80" alt="Control psiquiátrico" loading="lazy" onerror="this.remove()"><span class="ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 20.5a5 5 0 0 1-7-7l10-10a5 5 0 0 1 7 7z"/><path d="M8.5 8.5l7 7"/></svg></span><span class="svc-on"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> Online</span></a>
+          <div class="svc-body"><h3><a href="servicio?id=control-psiquiatrico">Control psiquiátrico</a></h3><p>Seguimiento de tu tratamiento: cómo te sientes, ajuste de dosis y nueva receta si corresponde.</p>
+            <div class="svc-foot"><div class="price"><small>30 min</small><b>S/ 120</b></div><a href="servicio?id=control-psiquiatrico" class="btn btn-light btn-sm">Ver más <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+          </div>
+        </article>
+        <article class="svc reveal">
+          <a class="svc-img" href="servicio?id=terapia-pareja"><img src="https://images.unsplash.com/photo-1604881991720-f91add269bed?auto=format&fit=crop&w=700&q=80" alt="Terapia de pareja" loading="lazy" onerror="this.remove()"><span class="ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="7" r="3"/><circle cx="16" cy="7" r="3"/><path d="M2 21a6 6 0 0 1 12 0M10 21a6 6 0 0 1 12 0"/></svg></span><span class="svc-on"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> Online</span></a>
+          <div class="svc-body"><h3><a href="servicio?id=terapia-pareja">Terapia de pareja</a></h3><p>Mejoren la comunicación, resuelvan conflictos y reconecten como pareja, con un terapeuta imparcial.</p>
+            <div class="svc-foot"><div class="price"><small>60 min</small><b>S/ 160</b></div><a href="servicio?id=terapia-pareja" class="btn btn-light btn-sm">Ver más <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+          </div>
+        </article>
+        <article class="svc reveal">
+          <a class="svc-img" href="servicio?id=terapia-familiar"><img src="https://images.unsplash.com/photo-1758598737516-ffd38ba74838?auto=format&fit=crop&w=700&q=80" alt="Terapia familiar" loading="lazy" onerror="this.remove()"><span class="ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="6" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="12" cy="12" r="2"/><path d="M3 21v-5a4 4 0 0 1 8 0M13 21v-5a4 4 0 0 1 8 0M9.5 21v-2a2.5 2.5 0 0 1 5 0v2"/></svg></span><span class="svc-on"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> Online</span></a>
+          <div class="svc-body"><h3><a href="servicio?id=terapia-familiar">Terapia familiar</a></h3><p>Para familias que atraviesan cambios, conflictos, duelos o dificultades con los hijos.</p>
+            <div class="svc-foot"><div class="price"><small>60 min</small><b>S/ 170</b></div><a href="servicio?id=terapia-familiar" class="btn btn-light btn-sm">Ver más <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section data-sec="equipo">
+    <div class="container">
+      <div class="head-row">
+        <div class="sec-head reveal"><span class="pill coral"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M1 21a8 8 0 0 1 16 0M17 4a4 4 0 0 1 0 8M23 21a8 8 0 0 0-5-7.4"/></svg> Especialistas</span><h2>Conoce a <span class="c-pri">nuestro equipo</span></h2>
+          <p>Profesionales colegiados que coordinan entre sí para cuidarte mejor.</p></div>
+        <a href="especialistas" class="btn btn-light reveal"><span data-t="ini.eqbtn">Ver a todo el equipo</span> <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="pros" data-pros data-limit="3">
+        <article class="pro reveal">
+          <div class="pro-av">VM</div>
+          <div class="pro-b"><span class="pro-area psiquiatria">Psiquiatría</span><h3>Dra. Valeria Montes</h3><b class="pro-cargo">Psiquiatra de adultos</b><p>Médica psiquiatra con 15 años de experiencia en ansiedad, depresión y trastornos del sueño.</p>
+            <small class="pro-enf">Ansiedad · Depresión · Sueño</small>
+            <div class="pro-foot"><span class="pro-mod"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg> Presencial · <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> Online</span><a class="btn btn-light btn-sm" href="citas?pro=valeria">Agendar <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div>
+        </article>
+        <article class="pro reveal">
+          <div class="pro-av">RS</div>
+          <div class="pro-b"><span class="pro-area psiquiatria">Psiquiatría</span><h3>Dr. Ricardo Salinas</h3><b class="pro-cargo">Psiquiatra infantil y del adolescente</b><p>Psiquiatra infantil: TDAH, ansiedad y conducta en niños y adolescentes, siempre de la mano de la familia.</p>
+            <small class="pro-enf">TDAH · Ansiedad infantil · Conducta</small>
+            <div class="pro-foot"><span class="pro-mod"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg> Presencial</span><a class="btn btn-light btn-sm" href="citas?pro=ricardo">Agendar <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div>
+        </article>
+        <article class="pro reveal">
+          <div class="pro-av">CO</div>
+          <div class="pro-b"><span class="pro-area psicologia">Psicología</span><h3>Ps. Camila Ortega</h3><b class="pro-cargo">Psicóloga clínica · ansiedad y depresión</b><p>Psicóloga clínica especialista en ansiedad, ataques de pánico y depresión con terapia cognitivo-conductual.</p>
+            <small class="pro-enf">TCC · Ansiedad · Pánico · Duelo</small>
+            <div class="pro-foot"><span class="pro-mod"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg> Presencial · <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> Online</span><a class="btn btn-light btn-sm" href="citas?pro=camila">Agendar <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section data-sec="online">
+    <div class="container split">
+      <div class="split-img reveal"><img data-ik="on.img" src="https://images.unsplash.com/photo-1681052184483-c2de90f56ca6?auto=format&fit=crop&w=900&q=80" alt="Mujer en una sesión online desde su sofá" loading="lazy" onerror="this.remove()"></div>
+      <div class="reveal">
+        <div class="sec-head" style="margin-bottom:18px"><span class="pill mint"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> Online</span><h2>Tu sesión desde <span class="c-pri">donde estés</span></h2>
+        <p>La misma calidad que en el consultorio, por videollamada segura desde tu celular o computadora.</p></div>
+        <ul class="checks">
+          <li><span data-t="ini.on1">Atención para todo el Perú y peruanos en el extranjero</span></li>
+          <li><span data-t="ini.on2">El enlace de la videollamada aparece en Mi Espacio</span></li>
+          <li><span data-t="ini.on3">Pagas con Yape, Plin, transferencia o tarjeta</span></li>
+          <li><span data-t="ini.on4">Sin tráfico ni sala de espera</span></li>
+        </ul>
+        <a href="citas?modalidad=Online" class="btn btn-pri"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> <span data-t="ini.onbtn">Agendar sesión online</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section data-sec="portal">
+    <div class="container portal">
+      <div class="reveal">
+        <div class="sec-head" style="margin-bottom:0"><span class="pill mint"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg> Mi Espacio</span><h2>Tu proceso, <span class="c-pri">en tu celular</span></h2>
+        <p>Con tu código personal ves tus próximas sesiones, entras a la videollamada, revisas tus paquetes, tus tareas y descargas recibos y constancias.</p></div>
+        <ul class="portal-list">
+          <li><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg></i><div><b><span data-t="ini.p1t">Próximas sesiones y videollamada</span></b><span><span data-t="ini.p1s">Con cuenta regresiva y el botón para entrar a tu sesión online.</span></span></div></li>
+          <li><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg></i><div><b><span data-t="ini.p2t">Paquetes de sesiones</span></b><span><span data-t="ini.p2s">Cuántas sesiones usaste y cuántas te quedan.</span></span></div></li>
+          <li><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12l3 3 5-6"/></svg></i><div><b><span data-t="ini.p3t">Tareas y mi avance</span></b><span><span data-t="ini.p3s">Los ejercicios que te deja tu terapeuta y cómo vas mejorando.</span></span></div></li>
+          <li><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></i><div><b><span data-t="ini.p4t">Recibos, recetas y constancias</span></b><span><span data-t="ini.p4s">Descárgalos en PDF cuando los necesites.</span></span></div></li>
+        </ul>
+        <p class="portal-lock"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> <span data-t="ini.plock">Tus notas de sesión nunca se muestran en Mi Espacio: solo las ve tu profesional.</span></p>
+        <a href="mi-espacio" class="btn btn-pri"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg> <span data-t="ini.pbtn">Probar con un código demo</span></a>
+      </div>
+      <div class="phone-wrap reveal" aria-hidden="true">
+          <div class="phone"><div class="scr">
+            <div class="p-top"><small>Mi Espacio · MS-1024</small><b>Hola, Lucía</b></div>
+            <div class="p-body">
+              <div class="p-next"><small>PRÓXIMA SESIÓN · MAÑANA</small><b>Terapia individual</b><span>19:00 h · Ps. Camila Ortega · Online</span><em class="p-join"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg> Unirme a la videollamada</em></div>
+              <div class="p-plan"><div><b>Paquete de 8 sesiones</b><small>Te quedan 3</small></div><span class="bar"><i style="width:62%"></i></span></div>
+              <div class="p-plan"><div><b>Mi avance · ansiedad</b><small class="c-ok">−9 puntos</small></div><svg class="p-spark" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"><polyline points="2,6 34,13 66,21 98,28" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="98" cy="28" r="3.5" fill="currentColor"/></svg></div>
+              <div class="p-row"><div><b>Tarea de la semana</b><br><small>Respiración 5 min, 2 veces al día</small></div><span class="st ok">Hecha</span></div>
+              <div class="p-row"><div><b>Constancia de atención</b><br><small>Descárgala en PDF</small></div><span class="st">PDF</span></div>
+            </div>
+          </div></div>
+        </div>
+    </div>
+  </section>
+
+  <section data-sec="paquetes">
+    <div class="container">
+      <div class="sec-head center reveal"><span class="pill"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg> Paquetes</span><h2>Ahorra con <span class="c-pri">paquetes de sesiones</span></h2>
+        <p>La terapia funciona mejor con constancia. Elige un paquete y paga menos por sesión.</p></div>
+      <div class="plans">
+        <div class="plan reveal"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/></svg></i><h3><span data-t="ini.q1t">4 sesiones</span></h3><p class="plan-p"><span data-t="ini.q1p">S/ 400</span><small><span data-t="ini.q1s"> total</span></small></p><span><span data-t="ini.q1d">S/ 100 por sesión · vence en 2 meses</span></span></div>
+        <div class="plan reveal hl"><span class="plan-tag"><span data-t="ini.q2tag">Más elegido</span></span><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20A7 7 0 0 1 4 13c0-6 6-10 16-10 0 10-4 16-10 16"/><path d="M4 21c3-6 7-9 12-11"/></svg></i><h3><span data-t="ini.q2t">8 sesiones</span></h3><p class="plan-p"><span data-t="ini.q2p">S/ 760</span><small><span data-t="ini.q2s"> total</span></small></p><span><span data-t="ini.q2d">S/ 95 por sesión · vence en 4 meses</span></span></div>
+        <div class="plan reveal"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></i><h3><span data-t="ini.q3t">12 sesiones</span></h3><p class="plan-p"><span data-t="ini.q3p">S/ 1,080</span><small><span data-t="ini.q3s"> total</span></small></p><span><span data-t="ini.q3d">S/ 90 por sesión · vence en 6 meses</span></span></div>
+      </div>
+      <p class="price-note reveal"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> <span data-t="ini.qnota">Válido para terapia individual. Pregunta por paquetes de terapia de pareja, infantil y psiquiatría + terapia.</span></p>
+    </div>
+  </section>
+
+  <section data-sec="emergencias">
+    <div class="container">
+
+      <div class="emergency crisis-banner reveal" data-emerg>
+        <div class="e-l"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M4.9 4.9l4.3 4.3M14.8 14.8l4.3 4.3M14.8 9.2l4.3-4.3M4.9 19.1l4.3-4.3"/></svg></i><div><h3>¿Estás pasando por una crisis ahora?</h3><p>Si piensas en hacerte daño o sientes que no puedes más, no esperes una cita: llama gratis a la Línea 113, opción 5 (Minsa, las 24 horas) o acude a la emergencia más cercana.</p></div></div>
+        <a class="btn" href="tel:113"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg> <span data-t="em.btn">Llamar a la Línea 113</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section data-sec="pasos">
+    <div class="container">
+      <div class="sec-head center reveal">
+        <span class="pill"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20A7 7 0 0 1 4 13c0-6 6-10 16-10 0 10-4 16-10 16"/><path d="M4 21c3-6 7-9 12-11"/></svg> Así de fácil</span>
+        <h2>Empezar es <span class="c-pri">más fácil de lo que crees</span></h2>
+      </div>
+      <div class="steps">
+        <div class="step reveal"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M16 8l-2 6-6 2 2-6z"/></svg></i><h3><span data-t="ini.s1t">Elige el servicio</span></h3><p><span data-t="ini.s1s">O una consulta de orientación si no sabes por dónde empezar.</span></p></div>
+        <div class="step reveal"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/></svg></i><h3><span data-t="ini.s2t">Presencial u online</span></h3><p><span data-t="ini.s2s">Escoge cómo te sientes más cómodo.</span></p></div>
+        <div class="step reveal"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></i><h3><span data-t="ini.s3t">Día y hora libre</span></h3><p><span data-t="ini.s3s">Tu cita queda confirmada al instante.</span></p></div>
+        <div class="step reveal"><i><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg></i><h3><span data-t="ini.s4t">Sigue todo en Mi Espacio</span></h3><p><span data-t="ini.s4s">Sesiones, tareas, paquetes y documentos.</span></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section data-sec="testimonios">
+    <div class="container">
+      <div class="sec-head center reveal">
+        <span class="pill coral"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg> Historias</span>
+        <h2>Personas que <span class="c-pri">volvieron a sentirse bien</span></h2>
+        <p>Compartido con permiso. Usamos solo iniciales para cuidar su privacidad.</p>
+      </div>
+      <div class="testis" data-testis>
+        <figure class="testi reveal"><div class="stars">★★★★★</div><blockquote>"Llegué con ataques de pánico y sin saber qué me pasaba. Con la terapia aprendí a manejarlos y hoy vuelvo a hacer mi vida normal."</blockquote>
+          <figcaption class="testi-who"><span class="av">LF</span><div><b>Lucía F.</b><span>Terapia individual</span></div></figcaption></figure>
+        <figure class="testi reveal"><div class="stars">★★★★★</div><blockquote>"Hago mis sesiones online desde Arequipa y en Mi Espacio veo mis citas, mis tareas y cuántas sesiones me quedan. Súper práctico."</blockquote>
+          <figcaption class="testi-who"><span class="av">JM</span><div><b>Jorge M.</b><span>Terapia online</span></div></figcaption></figure>
+        <figure class="testi reveal"><div class="stars">★★★★★</div><blockquote>"Mi hijo tenía mucha ansiedad en el colegio. La psicóloga y el psiquiatra trabajaron juntos y nos dieron pautas claras como padres."</blockquote>
+          <figcaption class="testi-who"><span class="av">CR</span><div><b>Carmen R.</b><span>Mamá de Joaquín</span></div></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section data-sec="faq">
+    <div class="container faq-wrap">
+      <div class="sec-head reveal"><span class="pill"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg> Dudas</span><h2>Preguntas <span class="c-pri">frecuentes</span></h2><p></p></div>
+      <div class="faq reveal">
+        <details open><summary><span data-t="faq.q1">¿Psicólogo o psiquiatra: a quién debo ir?</span></summary><p><span data-t="faq.a1">El psicólogo te acompaña con psicoterapia; el psiquiatra es médico y puede diagnosticar e indicar medicación. Si no sabes, agenda una consulta de orientación y te recomendamos lo mejor para ti.</span></p></details>
+        <details><summary><span data-t="faq.q2">¿La terapia online funciona igual?</span></summary><p><span data-t="faq.a2">Sí. Para la mayoría de personas la terapia por videollamada es tan efectiva como la presencial. Solo necesitas un lugar privado e internet.</span></p></details>
+        <details><summary><span data-t="faq.q3">¿Lo que cuento es confidencial?</span></summary><p><span data-t="faq.a3">Sí. Todo lo que conversas está protegido por el secreto profesional. Tus notas clínicas solo las ve tu profesional; Mi Espacio nunca muestra notas de sesión.</span></p></details>
+        <details><summary><span data-t="faq.q4">¿Cuánto dura una sesión y cada cuánto?</span></summary><p><span data-t="faq.a4">Una sesión de terapia dura 50 minutos. Al inicio suele ser semanal y luego quincenal, según tu avance.</span></p></details>
+        <details><summary><span data-t="faq.q5">¿Qué hago si estoy en crisis?</span></summary><p><span data-t="faq.a5">No esperes una cita: llama gratis a la Línea 113, opción 5 (Minsa, 24 horas), al SAMU 106 o acude a la emergencia más cercana.</span></p></details>
+      </div>
+    </div>
+  </section>
+
+  <section data-sec="cta">
+    <div class="container">
+      <div class="cta reveal">
+        <div>
+          <h2>Dar el primer paso es lo más difícil</h2>
+          <p>Y no tienes que darlo solo. Agenda una primera consulta de orientación, presencial u online.</p>
+          <div class="hero-actions">
+            <a href="citas?servicio=orientacion" class="btn btn-white"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> <span data-t="cta.b1">Agendar orientación</span></a>
+            <a href="mi-espacio" class="btn btn-glass"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg> <span data-t="cta.b2">Entrar a Mi Espacio</span></a>
+          </div>
+        </div>
+        <div class="cta-img"><img data-ik="cta" src="https://images.unsplash.com/photo-1566815974688-89f997e0fccf?auto=format&fit=crop&w=700&q=80" alt="Persona mirando las montañas con calma" loading="lazy" onerror="this.remove()"></div>
+      </div>
+    </div>
+  </section>
+
+  <div id="pgBloques"></div>
+  <!-- ============ PIE ============ -->
+  <footer>
+    <div class="foot-wave" aria-hidden="true"></div>
+    <div class="container foot">
+      <div>
+        <a href="./" class="brand" data-brand aria-label="Inicio"><span class="paw"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-4.5-2.5-8-6.4-8-10.5A4.5 4.5 0 0 1 12 8a4.5 4.5 0 0 1 8 2.5c0 4.1-3.5 8-8 10.5z" fill="none" stroke="#fff" stroke-width="2"/><path d="M12 8c0-3 1.5-5 4-5-.2 2.6-1.6 4.3-4 5z" fill="#fff"/></svg></span><span>Mente<b> Serena</b><small>Psiquiatría y Psicología</small></span></a>
+        <p id="pieTexto">Centro de psiquiatría y psicología. Atención presencial en Miraflores y online para todo el Perú, con calidez y total confidencialidad.</p>
+        <div class="socials">
+          <a href="#" data-red="facebook" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M14 8V6c0-.8.5-1 1-1h2V2h-3c-3 0-4 2-4 4v2H8v3h2v11h4V11h3l.5-3z"/></svg></a>
+          <a href="#" data-red="instagram" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm5.5-9.5a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4zM17 2H7a5 5 0 0 0-5 5v10a5 5 0 0 0 5 5h10a5 5 0 0 0 5-5V7a5 5 0 0 0-5-5zm3 15a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3z"/></svg></a>
+          <a href="#" data-red="tiktok" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M16.6 5.8A4.3 4.3 0 0 1 15.5 3h-3.1v12.4a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.7a5.7 5.7 0 1 0 4.9 5.7V9a7.3 7.3 0 0 0 4.3 1.4V7.3a4.3 4.3 0 0 1-3.2-1.5z"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h4><span data-t="pie.c1">Servicios</span></h4>
+        <ul>
+          <li><a href="servicio?id=terapia-individual"><span data-t="pie.c1a">Terapia individual</span></a></li>
+          <li><a href="servicio?id=consulta-psiquiatrica"><span data-t="pie.c1b">Psiquiatría</span></a></li>
+          <li><a href="servicio?id=terapia-pareja"><span data-t="pie.c1c">Terapia de pareja</span></a></li>
+          <li><a href="servicio?id=terapia-infantil"><span data-t="pie.c1d">Niños y adolescentes</span></a></li>
+        </ul>
+      </div>
+      <div>
+        <h4><span data-t="pie.c2">Pacientes</span></h4>
+        <ul>
+          <li><a href="citas"><span data-t="pie.c2a">Reservar cita</span></a></li>
+          <li><a href="mi-espacio"><span data-t="pie.c2b">Mi Espacio</span></a></li>
+          <li><a href="especialistas"><span data-t="pie.c2c">Especialistas</span></a></li>
+          <li><a href="privacidad"><span data-t="pie.c2d">Aviso de privacidad</span></a></li>
+        </ul>
+      </div>
+      <div class="foot-c">
+        <h4><span data-t="pie.c3">Visítanos</span></h4>
+        <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-7.6 8-13a8 8 0 0 0-16 0c0 5.4 8 13 8 13z"/><circle cx="12" cy="9" r="3"/></svg> <span data-aj="direccion">Av. Del Ejército 1180, Miraflores, Lima</span></span>
+        <a class="wa-link" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg> <span data-aj="telefono">+51 987 654 321</span></a>
+        <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg> <span data-aj="correo">citas@menteserena.pe</span></span>
+        <span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span data-aj="horario">Lun a Sáb 8:00 – 21:00 · Dom cerrado</span></span>
+      </div>
+    </div>
+    <div class="container foot-bottom">
+      <span>© 2026 <span data-nombre>Mente Serena</span> · <span data-eslogan>Psiquiatría y Psicología</span></span>
+      <span>Web creada por <a href="https://ziko.pro" target="_blank" rel="noopener">ziko.pro</a></span>
+    </div>
+  </footer>
+
+  <!-- ============ AYUDA INMEDIATA ============ -->
+  <button class="crisis-fab" type="button" data-crisis aria-label="Ayuda inmediata"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M4.9 4.9l4.3 4.3M14.8 14.8l4.3 4.3M14.8 9.2l4.3-4.3M4.9 19.1l4.3-4.3"/></svg><span>Ayuda inmediata</span></button>
+  <div class="crisis" id="crisis" role="dialog" aria-modal="true" aria-labelledby="crisisT" hidden>
+    <div class="shade" data-crisis-close></div>
+    <div class="crisis-box">
+      <button class="x-btn" data-crisis-close aria-label="Cerrar"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      <i class="crisis-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M4.9 4.9l4.3 4.3M14.8 14.8l4.3 4.3M14.8 9.2l4.3-4.3M4.9 19.1l4.3-4.3"/></svg></i>
+      <h3 id="crisisT"><span data-t="cr.t">No estás solo. Pide ayuda ahora</span></h3>
+      <p><span data-t="cr.p">Si piensas en hacerte daño, en quitarte la vida o estás en peligro, no esperes una cita. Comunícate ya con alguno de estos servicios:</span></p>
+      <a class="crisis-line" href="tel:113"><b>113 · opción 5</b><span>Línea de salud mental del Minsa · gratuita, las 24 horas</span></a>
+      <a class="crisis-line" href="tel:106"><b>106</b><span>SAMU · emergencias médicas</span></a>
+      <div class="crisis-line static"><b>Emergencia</b><span>Acude a la emergencia del hospital o clínica más cercana</span></div>
+      <p class="crisis-note"><span data-t="cr.n">Nuestro WhatsApp es para citas y consultas: no es un servicio de emergencias. Si puedes, avisa también a alguien de confianza para que te acompañe.</span></p>
+    </div>
+  </div>
+
+  <a class="wa-float wa-link" href="#" aria-label="Escríbenos por WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5 2.5 1 3 .8 3.6.8.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.3-.6-.4zM12 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A9.8 9.8 0 1 1 12 21.8zM12 0a12 12 0 0 0-10.3 18L0 24l6.2-1.6A12 12 0 1 0 12 0z"/></svg></a>
+</body>
+</html>
