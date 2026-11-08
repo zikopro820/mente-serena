@@ -156,5 +156,27 @@
     doc.save(`Constancia-${archivo(r.paciente || "paciente")}-${iso(r.fecha)}.pdf`);
   }
 
-  window.PDFV = { recibo, receta, constancia, num, cargar: lib };
+  /* ---------------- CONSENTIMIENTO INFORMADO ---------------- */
+  async function consentimiento(r) {
+    const J = await lib(), P = base(J), { doc, x0, x1 } = P, neg = r.neg || {}, col = rgb(neg.color);
+    let y = cabecera(P, neg, "CONSENTIMIENTO", fmt(r.fecha));
+    y = datos(P, y, r.campos || []);
+    y = P.need(y + 2, 14);
+    P.t(r.subtitulo || "CONSENTIMIENTO INFORMADO PARA LA ATENCIÓN", (x0 + x1) / 2, y, { b: 1, s: 10, c: col, a: "center" }); y += 7;
+    String(r.texto || "").split(/\n+/).filter(Boolean).forEach(par => {
+      P.wrap(par, x1 - x0, 8.4).forEach(l => { y = P.need(y, 4.6); P.t(l, x0, y, { s: 8.4 }); y += 4.2; }); y += 2.2;
+    });
+    y = P.need(y + 4, 34);
+    if (r.firma && /^data:image\/png/.test(r.firma)) { try { doc.addImage(r.firma, "PNG", x1 - 60, y, 58, 22); } catch (e) {} }
+    y += 23; doc.setDrawColor(...GRIS); doc.line(x1 - 62, y, x1, y);
+    P.t(r.firmante || r.paciente || "", x1 - 31, y + 4.2, { b: 1, s: 8.2, a: "center" });
+    P.t(r.firmanteDoc ? "DNI " + r.firmanteDoc : "Firma del paciente o apoderado", x1 - 31, y + 7.8, { s: 7, c: GRIS, a: "center" });
+    P.t(`Firmado el ${fmt(r.fecha)}${r.hora ? " a las " + r.hora + " h" : ""}`, x0, y + 4.2, { s: 7.4, c: GRIS });
+    P.y = y + 10;
+    pie(P, [{ s: `${neg.razon || neg.nombre || ""}${neg.dir ? " · " + neg.dir : ""}` }, { s: "Documento confidencial · se guarda en la historia del paciente.", size: 6.6 }]);
+    doc.setFillColor(...col); doc.rect(0, P.H - 2.5, P.W, 2.5, "F");
+    doc.save(`Consentimiento-${archivo(r.paciente || "paciente")}-${iso(r.fecha)}.pdf`);
+  }
+
+  window.PDFV = { recibo, receta, constancia, consentimiento, num, cargar: lib };
 })();

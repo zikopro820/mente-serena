@@ -20,7 +20,9 @@ window.DATOS = {
   "ruc": "",
   "reciboPie": "",
   "crisisLinea": "113",
-  "crisisOpcion": "5"
+  "crisisOpcion": "5",
+  "tiempoReal": true,
+  "enlaceFijo": ""
  },
  "servicios": [
   {
