@@ -728,7 +728,7 @@ window.DATOS = {
     "pill": "Mi Espacio",
     "titulo": "Tu proceso,",
     "tituloColor": "en tu celular",
-    "texto": "Con tu código personal ves tus próximas sesiones, entras a la videollamada, revisas tus paquetes, tus tareas y descargas recibos y constancias.",
+    "texto": "Con tu código personal ves tus sesiones, entras a la videollamada, registras tu ánimo, cumples tus retos del día con ejercicios guiados y descargas recibos y constancias.",
     "visible": true
    },
    {
@@ -1338,14 +1338,14 @@ window.DATOS = {
    "pag": "inicio",
    "g": "Portal Mi Espacio",
    "l": "Punto 3 · título",
-   "v": "Tareas y mi avance"
+   "v": "Retos del día y ejercicios guiados"
   },
   {
    "k": "ini.p3s",
    "pag": "inicio",
    "g": "Portal Mi Espacio",
    "l": "Punto 3 · texto",
-   "v": "Los ejercicios que te deja tu terapeuta y cómo vas mejorando."
+   "v": "Registra tu ánimo, cumple los retos que te deja tu terapeuta, respira con ejercicios guiados y mira tu avance."
   },
   {
    "k": "ini.p4t",

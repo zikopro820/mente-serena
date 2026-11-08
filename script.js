@@ -288,16 +288,18 @@ async function buscarCliente(code) {   // → { dueno, mascotas:[{id,nombre,espe
   if (EN_VIVO) {
     const { fs, db } = await fb();
     const c = await fs.getDoc(fs.doc(db, "clientes", code)); if (!c.exists()) return null;
-    const ms = await fs.getDocs(fs.collection(db, "clientes", code, "mascotas"));
-    return { dueno: c.data().dueno || "", mascotas: ms.docs.map(d => ({ id: d.id, ...d.data() })) };
+    const [ms, ag] = await Promise.all([fs.getDocs(fs.collection(db, "clientes", code, "mascotas")), fs.getDocs(fs.collection(db, "clientes", code, "agenda")).catch(() => ({ docs: [] }))]);
+    return { dueno: c.data().dueno || "", mascotas: ms.docs.map(d => ({ id: d.id, ...d.data() })), agenda: ag.docs.map(d => ({ id: d.id, ...d.data() })) };
   }
-  const c = ((localDB() || {}).clientes || {})[code];
-  if (!c) { const d = typeof CLIENTES !== "undefined" && CLIENTES[code]; return d ? { dueno: d.dueno, mascotas: d.mascotas, demo: true } : null; }
-  return { dueno: c.dueno, mascotas: Object.entries(c.mascotas || {}).map(([id, m]) => ({ id, ...m })) };
+  const L = localDB() || {}, c = (L.clientes || {})[code];
+  if (!c) { const d = typeof CLIENTES !== "undefined" && CLIENTES[code];
+    return d ? { dueno: d.dueno, mascotas: d.mascotas, demo: true, agenda: d.mascotas.flatMap(m => (m.citas || []).map(x => ({ mascotaId: m.id, fecha: isoD(x.fecha instanceof Date ? x.fecha : new Date(x.fecha + "T12:00")), estado: "confirmada", paqueteId: x.paquete && m.paquetes[0] ? m.paquetes[0].id : "" }))) } : null; }
+  return { dueno: c.dueno, mascotas: Object.entries(c.mascotas || {}).map(([id, m]) => ({ id, ...m })), agenda: Object.entries(L.citas || {}).filter(([, a]) => a.code === code).map(([id, a]) => ({ id, ...a })) };
 }
 async function reservar(base) {   // intenta ocupar un lugar libre del horario; devuelve el id de la cita
   const cap = Math.max(1, capHora(base.fecha, base.hora)), pub = base.code && base.mascotaId;
   const agenda = { fecha: base.fecha, hora: base.hora, servicio: base.servicio, precio: base.precio, modalidad: base.modalidad, mascota: base.mascota, mascotaId: base.mascotaId, total: base.precio, pagado: 0, estadoPago: "pendiente", estado: "confirmada", creado: base.creado };
+  if (base.paqueteId) agenda.paqueteId = base.paqueteId;
   for (let k = 1; k <= cap; k++) {
     const id = `${base.fecha}_${base.hora}_${k}`;
     if (EN_VIVO) {
@@ -386,15 +388,56 @@ function iniciarCitas(servicios) {
     $("#sMod").textContent = ($("input[name=modalidad]:checked", book) || {}).value || "Presencial";
     $("#sDate").textContent = dateIn.value ? nice(dateIn.value) : "—";
     $("#sHour").textContent = slot || "—";
-    $("#sPrice").textContent = s ? s.dataset.price : "—";
+    $("#sPrice").textContent = PAQ.usar ? "S/ 0 · incluida en tu paquete" : s ? s.dataset.price : "—";
+    $(".summary .sum-total").classList.toggle("paq", !!PAQ.usar);
   }
   book.addEventListener("input", updateSum); book.addEventListener("change", updateSum);
+
+  /* ---- Paquete de sesiones (pagado por adelantado) ---- */
+  const PAQ = { p: null, disp: 0, usar: false };
+  const paqBox = document.createElement("div"); paqBox.id = "paqBox"; $("#petPick").after(paqBox);
+  const hoyIso = isoD(new Date());
+  function paqueteDe(m) {
+    PAQ.p = null; PAQ.disp = 0; PAQ.usar = false; paqBox.innerHTML = ""; if (!m) return updateSum();
+    const lista = (m.paquetes || []).map(p => ({ ...p, ses: +p.ses || 0, usadas: +p.usadas || 0 }));
+    const vig = lista.find(p => p.usadas < p.ses && (!p.vence || String(p.vence).slice(0, 10) >= hoyIso));
+    if (!vig) {
+      const ult = lista[lista.length - 1];
+      if (ult) paqBox.innerHTML = `<div class="paq-msg off">${ICO.paw}<div><b>Tu paquete «${esc(ult.t)}» ${ult.usadas >= ult.ses ? "ya no tiene sesiones" : "venció"}</b><small>Puedes reservar pagando la sesión, o renovarlo con descuento.</small></div><button type="button" class="btn btn-light btn-sm" data-renovar>Renovar por WhatsApp</button></div>`;
+      return updateSum();
+    }
+    const reservadas = (cliente.agenda || []).filter(a => a.mascotaId === m.id && a.paqueteId === vig.id && (a.estado || "confirmada") === "confirmada" && String(a.fecha).slice(0, 10) >= hoyIso).length;
+    PAQ.p = vig; PAQ.disp = Math.max(vig.ses - vig.usadas - reservadas, 0);
+    const quedan = vig.ses - vig.usadas;
+    if (!PAQ.disp) {
+      paqBox.innerHTML = `<div class="paq-msg off">${ICO.paw}<div><b>Ya reservaste todas las sesiones de tu paquete</b><small>Te quedan ${quedan} sin usar y tienes ${reservadas} cita(s) reservada(s) con ellas. Para otra cita, paga la sesión o renueva tu paquete.</small></div><button type="button" class="btn btn-light btn-sm" data-renovar>Renovar por WhatsApp</button></div>`;
+      return updateSum();
+    }
+    paqBox.innerHTML = `<label class="paq-msg on"><input type="checkbox" id="usarPaq" checked><div><b>Usar mi paquete · te ${PAQ.disp === 1 ? "queda 1 sesión disponible" : `quedan ${PAQ.disp} sesiones disponibles`}</b>
+      <small>${esc(vig.t)}${reservadas ? ` · ya tienes ${reservadas} reservada(s)` : ""}${vig.vence ? ` · vence el ${nice(String(vig.vence).slice(0, 10))}` : ""}. Esta cita no se paga: ya está pagada.</small></div><span class="paq-cero">S/ 0</span></label><p class="paq-warn" id="paqWarn"></p>`;
+    PAQ.usar = true; ajustarPaq(true);
+  }
+  // el paquete es para un servicio: si eligen otro, se cobra normal
+  function ajustarPaq(elegir) {
+    const chk = $("#usarPaq"); if (!PAQ.p || !chk) return updateSum();
+    const s = $("input[name=servicio]:checked", book), quiere = chk.checked;
+    if (quiere && PAQ.p.servicio && elegir) { const r = $$("input[name=servicio]", book).find(x => x.dataset.key === PAQ.p.servicio); if (r && r !== s) { r.checked = true; llenarPros(); revisarModalidad(); drawSlots(); } }
+    const s2 = $("input[name=servicio]:checked", book), vale = !PAQ.p.servicio ? (s2 && s2.dataset.area !== "psiquiatria") : (s2 && s2.dataset.key === PAQ.p.servicio);
+    PAQ.usar = quiere && vale;
+    const w = $("#paqWarn"); if (w) w.textContent = quiere && !vale ? "Tu paquete no incluye este servicio: esta cita se paga aparte." : "";
+    chk.closest(".paq-msg").classList.toggle("dim", !PAQ.usar);
+    updateSum();
+  }
+  paqBox.addEventListener("change", e => { if (e.target.id === "usarPaq") ajustarPaq(true); });
+  paqBox.addEventListener("click", e => { if (e.target.closest("[data-renovar]")) { const m = cliente && cliente.mascotas.find(x => x.id === $("[name=mascotaId]", book).value);
+    wa(`Hola ${NOMBRE}, quiero renovar mi paquete de sesiones${m ? " (paciente " + m.nombre + ")" : ""}. Mi código es ${cliente ? cliente.code : ""}.`); } });
+  book.addEventListener("change", e => { if (e.target.name === "servicio") ajustarPaq(false); });
 
   /* ---- ¿Ya es paciente? busca a su familia con el código ---- */
   const codeIn = $("[name=codigo]", book), msgC = $("#codeMsg"), pick = $("#petPick");
   const normCode = c => { c = String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); return /^[A-Z]{2}[A-Z0-9]+$/.test(c) ? c.slice(0, 2) + "-" + c.slice(2) : c; };
   async function verCodigo() {
-    const c = normCode(codeIn.value); cliente = null; pick.innerHTML = ""; $("[name=mascotaId]", book).value = "";
+    const c = normCode(codeIn.value); cliente = null; pick.innerHTML = ""; $("[name=mascotaId]", book).value = ""; paqueteDe(null);
     if (!c) { msgC.textContent = ""; return; }
     msgC.className = "code-msg"; msgC.textContent = "Buscando…";
     try { cliente = await buscarCliente(c); } catch (e) { cliente = null; }
@@ -419,7 +462,7 @@ function iniciarCitas(servicios) {
     $("[name=edad]", book).value = m ? edadDe(m.nac) : "";
     if (m && m.profesional && pref) { const o = [...pref.options].find(x => x.value === m.profesional); if (o) { pref.value = m.profesional; drawSlots(); } }
     if (!m) $("[name=mascota]", book).focus();
-    updateSum();
+    paqueteDe(m);
   });
 
   const ps = new URLSearchParams(location.search);
@@ -454,6 +497,7 @@ function iniciarCitas(servicios) {
       dueno: v("nombre").slice(0, 80), celular: v("celular").replace(/[^\d+ ]/g, "").slice(0, 15), motivo: v("motivo").slice(0, 300),
       origen: "web", estado: "confirmada", pagado: 0, estadoPago: "pendiente", creado: new Date().toISOString(),
     };
+    if (PAQ.usar && PAQ.p && cita.code && cita.mascotaId) { cita.precio = 0; cita.paqueteId = PAQ.p.id; }
     btn.disabled = true; msg.className = "f-msg"; msg.textContent = "Reservando…";
     let id = null;
     try { id = await reservar(cita); } catch (err) { console.error(err); }
@@ -464,13 +508,14 @@ function iniciarCitas(servicios) {
       `• Paciente: ${cita.mascota}${cita.edad ? " (" + cita.edad + " años)" : ""}`, `• Contacto: ${cita.dueno}`, `• Celular: ${cita.celular}`];
     if (cita.preferencia) txt.push(`• Profesional de preferencia: ${cita.preferencia}`);
     if (cita.code) txt.push(`• Código de paciente: ${cita.code}`);
+    if (cita.paqueteId) txt.push(`• Uso mi paquete: ${PAQ.p.t} (me quedarán ${PAQ.disp - 1} disponibles)`);
 
     book.hidden = true;
     const ok = $("#bookOk"); ok.hidden = false;
     ok.innerHTML = `<div class="ok-ic">${ICO.check}</div><h3>¡Cita confirmada!</h3><p>Te esperamos, ${esc(cita.dueno.split(" ")[0])}. Guarda estos datos:</p>
       <div class="ok-box"><div><span>Servicio</span><b>${esc(cita.servicio)}</b></div><div><span>Modalidad</span><b>${esc(cita.modalidad)}</b></div><div><span>Fecha</span><b>${esc(nice(cita.fecha))}</b></div>
       <div><span>Hora</span><b>${esc(cita.hora)} h</b></div><div><span>Paciente</span><b>${esc(cita.mascota)}</b></div>
-      <div><span>Precio</span><b>${cita.precio ? precio(cita.precio) : "A consultar"}</b></div>
+      <div><span>Precio</span><b>${cita.paqueteId ? "S/ 0 · incluida en tu paquete" : cita.precio ? precio(cita.precio) : "A consultar"}</b></div>
       <div class="full"><span>${cita.modalidad === "Online" ? "¿Cómo me conecto?" : "Te esperamos en"}</span><b>${cita.modalidad === "Online" ? "Te enviaremos el enlace de la videollamada por WhatsApp" + (cita.code ? " y aparecerá en Mi Espacio" : "") : esc(AJ.direccion)}</b></div></div>
       <p class="sub-ok">${cita.modalidad === "Online" ? "Busca un lugar privado y tranquilo, con buena conexión." : "Llega 10 minutos antes."} ${cita.code ? "También la verás en <b>Mi Espacio</b> con tu código." : "En tu primera sesión te daremos tu código para entrar a Mi Espacio."}</p>
       <div class="hero-actions"><button class="btn btn-pri" id="okWa">${ICO.check} Avisar por WhatsApp</button>${cita.code ? `<a class="btn btn-light" href="mi-espacio?codigo=${esc(cita.code)}">Ver en Mi Espacio</a>` : ""}<a class="btn btn-light" href="citas">Reservar otra</a></div>`;
@@ -495,10 +540,13 @@ const CLIENTES = {
       profesional: "Ps. Camila Ortega", psiquiatra: "Dra. Valeria Montes", modalidad: "Online",
       citas: [{ servicio: "Terapia individual · sesión 6", fecha: isoN(1), hora: "19:00", vet: "Ps. Camila Ortega", modalidad: "Online", enlace: MEET, total: 0, pagado: 0, paquete: true },
               { servicio: "Control psiquiátrico", fecha: isoN(16), hora: "17:00", vet: "Dra. Valeria Montes", modalidad: "Presencial", total: 120, pagado: 0 }],
-      paquetes: [{ id: "pq1", t: "Paquete de 8 sesiones · Terapia individual", ses: 8, usadas: 5, precio: 760, pagado: 760, desde: isoN(-36), vence: isoN(84) }],
+      paquetes: [{ id: "pq1", t: "Paquete de 8 sesiones · Terapia individual", ses: 8, usadas: 5, precio: 760, pagado: 760, desde: isoN(-36), vence: isoN(84), servicio: "terapia-individual" }],
       tareas: [{ id: "t1", t: "Registro de pensamientos", d: "Anota 3 situaciones de la semana: qué pasó, qué pensaste y qué sentiste (0 a 10).", f: isoN(-5) },
                { id: "t2", t: "Respiración diafragmática", d: "5 minutos, 2 veces al día. Usa el audio que te enviamos por WhatsApp.", f: isoN(-5) },
                { id: "t3", t: "Caminar 20 minutos", d: "3 veces por semana, de preferencia de día.", f: isoN(-12) }],
+      retos: [{ id: "r1", t: "Respiración 4-7-8 al despertar", d: "4 ciclos, sentada en la cama", ej: "respiracion478", activo: true, desde: isoN(-20) },
+               { id: "r2", t: "Escribe 3 cosas buenas del día", ej: "gratitud", activo: true, desde: isoN(-20) },
+               { id: "r3", t: "Caminar 20 minutos", d: "De preferencia con luz de día", activo: true, desde: isoN(-20) }],
       escalas: [{ id: "gad7", n: "Ansiedad (GAD-7)", max: 21, v: [{ f: isoN(-42), p: 16 }, { f: isoN(-28), p: 13 }, { f: isoN(-14), p: 10 }, { f: isoN(-5), p: 7 }] },
                 { id: "phq9", n: "Estado de ánimo (PHQ-9)", max: 27, v: [{ f: isoN(-42), p: 12 }, { f: isoN(-28), p: 10 }, { f: isoN(-14), p: 8 }, { f: isoN(-5), p: 6 }] }],
       historial: [
@@ -515,7 +563,7 @@ const CLIENTES = {
     { id: "joaquin", nombre: "Joaquín Ramos", sexo: "Masculino", nac: isoN(-10 * 365 - 90), dni: "", alergias: "Ninguna", menor: true,
       profesional: "Ps. Mariana Ríos", psiquiatra: "", modalidad: "Presencial",
       citas: [{ servicio: "Terapia infantil · sesión 3", fecha: isoN(4), hora: "16:00", vet: "Ps. Mariana Ríos", modalidad: "Presencial", total: 0, pagado: 0, paquete: true }],
-      paquetes: [{ id: "pq2", t: "Paquete de 4 sesiones · Terapia infantil", ses: 4, usadas: 2, precio: 400, pagado: 200, desde: isoN(-14), vence: isoN(46) }],
+      paquetes: [{ id: "pq2", t: "Paquete de 4 sesiones · Terapia infantil", ses: 4, usadas: 2, precio: 400, pagado: 200, desde: isoN(-14), vence: isoN(46), servicio: "terapia-infantil" }],
       tareas: [{ id: "t4", t: "Termómetro de emociones", d: "Antes de dormir, Joaquín marca cómo se sintió en el día (para los padres: acompañen sin corregir).", f: isoN(-3) },
                { id: "t5", t: "Rutina de la mañana con dibujos", d: "Usen la cartilla de la sesión para preparar el colegio sin apuro.", f: isoN(-3) }],
       escalas: [],
@@ -556,11 +604,11 @@ if (portal) {
     return { dueno: c.dueno || "", mascotas: pacs.map(m => {
       let citas = (m.citas || []).slice();
       if (agenda) citas = agenda.filter(a => a.mascotaId === m.id && (a.estado || "confirmada") === "confirmada");
-      citas = citas.map(a => ({ ...a, fecha: toD(a.fecha) })).filter(a => a.fecha >= hoy).sort((a, b) => (a.fecha - b.fecha) || String(a.hora).localeCompare(b.hora));
+      citas = citas.map(a => ({ ...a, paquete: a.paquete || !!a.paqueteId, fecha: toD(a.fecha) })).filter(a => a.fecha >= hoy).sort((a, b) => (a.fecha - b.fecha) || String(a.hora).localeCompare(b.hora));
       const hist = (m.historial || []).slice();
       (agenda || []).filter(a => a.mascotaId === m.id && a.estado === "atendida" && !hist.some(h => h.citaId === a.id))
         .forEach(a => hist.push({ f: a.fecha, hora: a.hora, t: a.servicio, vet: a.vet || "", modalidad: a.modalidad || "", monto: +a.total || 0, pagado: +a.pagado || 0, citaId: a.id, pagos: a.pagos || [], paquete: !!a.paqueteId }));
-      return { ...m, citas, paquetes: m.paquetes || [], tareas: m.tareas || [], escalas: m.escalas || [],
+      return { ...m, citas, paquetes: m.paquetes || [], tareas: m.tareas || [], escalas: m.escalas || [], retos: m.retos || [],
         historial: hist.map(h => ({ ...h, f: toD(h.f) })).sort((a, b) => b.f - a.f || String(b.hora || "").localeCompare(a.hora || "")),
         rec: (m.rec || []).map(r => ({ ...r, f: toD(r.f) })).filter(r => diff(r.f) >= -7).sort((a, b) => a.f - b.f) };
     }) };
@@ -595,16 +643,17 @@ if (portal) {
     $("#login").style.display = "none"; $("#dash").classList.add("show");
     render(); window.scrollTo({ top: portal.offsetTop - 90, behavior: "smooth" });
   }
-  function logout() { try { sessionStorage.removeItem("ms_code"); } catch (e) {} clearInterval(timer); $("#dash").classList.remove("show"); $("#login").style.display = ""; $("#codeIn").value = ""; }
+  function logout() { try { sessionStorage.removeItem("ms_code"); } catch (e) {} clearInterval(timer); window.dispatchEvent(new Event("me-logout")); $("#dash").classList.remove("show"); $("#login").style.display = ""; $("#codeIn").value = ""; }
 
   /* ---------- Paquetes ---------- */
   function paquetesHTML(m) {
     return m.paquetes.map(p => {
       const ses = +p.ses || 0, us = Math.min(+p.usadas || 0, ses), quedan = Math.max(ses - us, 0), pct = ses ? Math.round(us / ses * 100) : 0;
       const saldo = Math.max((+p.precio || 0) - (+p.pagado || 0), 0), dv = p.vence ? diff(p.vence) : null;
+      const res = m.citas.filter(c => c.paqueteId ? c.paqueteId === p.id : c.paquete).length;
       return `<div class="fin paq"><div class="fin-h"><b>${esc(p.t)}</b><span>${soles(p.precio)}</span></div>
         <div class="paq-dots">${Array.from({ length: ses }, (_, i) => `<i class="${i < us ? "on" : ""}" title="Sesión ${i + 1}"></i>`).join("")}</div>
-        <div class="fin-g"><div><small>Usadas</small><b>${us} de ${ses}</b></div><div><small>Te quedan</small><b class="${quedan <= 1 ? "c-red" : ""}">${quedan}</b></div><div><small>${saldo ? "Saldo" : "Pago"}</small><b class="${saldo ? "c-red" : ""}">${saldo ? soles(saldo) : "Completo"}</b></div></div>
+        <div class="fin-g"><div><small>Usadas</small><b>${us} de ${ses}</b></div><div><small>Te quedan</small><b class="${quedan <= 1 ? "c-red" : ""}">${quedan}</b>${res && quedan ? `<em class="paq-res">${res} ya reservada${res > 1 ? "s" : ""}</em>` : ""}</div><div><small>${saldo ? "Saldo" : "Pago"}</small><b class="${saldo ? "c-red" : ""}">${saldo ? soles(saldo) : "Completo"}</b></div></div>
         ${quedan === 0 ? `<div class="fin-next late"><span>Usaste todas tus sesiones. <a href="#" data-act="renovar" data-paq="${esc(p.t)}">Renovar paquete</a></span></div>`
           : dv != null ? `<div class="fin-next ${dv < 0 ? "late" : dv <= 14 ? "soon" : ""}"><span>${dv < 0 ? `Venció el ${fmt(p.vence)}` : `Vence el ${fmt(p.vence)} (${enDias(dv).toLowerCase()})`}${quedan <= 2 ? ` · <a href="#" data-act="renovar" data-paq="${esc(p.t)}">Renovar</a>` : ""}</span></div>` : ""}</div>`;
     }).join("");
@@ -690,6 +739,7 @@ if (portal) {
         <div class="doc-row">${rx || h.ind ? `<button type="button" class="doc-btn rx-btn" data-doc="rx" data-hi="${i}">${icono("pill")} ${rx ? "Descargar receta" : "Descargar indicaciones"}</button>` : ""}<button type="button" class="doc-btn" data-doc="ct" data-hi="${i}">${icono("file")} Constancia de atención</button>${+h.monto > 0 || +h.pagado > 0 ? `<button type="button" class="doc-btn" data-doc="rc" data-hi="${i}">${icono("card")} Recibo</button>` : ""}</div>
         ${h.vet ? `<span class="vet">Te atendió: ${esc(h.vet)}</span>` : ""}</li>`; }).join("")
       || `<p style="color:var(--muted)">Aún no hay sesiones registradas.</p>`;
+    window.dispatchEvent(new CustomEvent("me-render", { detail: { m, code, cli } }));
     $("#rems").innerHTML = m.rec.length ? m.rec.map(r => `<div class="rem"><i>${icono(r.i)}</i><b>${esc(r.t)}</b><small>${enDias(diff(r.f))} · ${fmt(r.f)}</small></div>`).join("")
       : `<p style="color:var(--muted)">Sin recordatorios por ahora.</p>`;
   }
