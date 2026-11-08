@@ -31,6 +31,42 @@ window.DATOS = {
   "plinQR": "data:image/png;base64,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",
   "plinNum": "987 654 321",
   "plinTitular": "Mente Serena SAC",
+  "pagoTransf": true,
+  "cuentas": [
+   {
+    "id": "bcp",
+    "banco": "BCP",
+    "tipo": "Ahorros",
+    "moneda": "Soles",
+    "num": "191-12345678-0-12",
+    "cci": "002-191-112345678012-55",
+    "titular": "Mente Serena SAC",
+    "url": "https://www.viabcp.com",
+    "logo": ""
+   },
+   {
+    "id": "interbank",
+    "banco": "Interbank",
+    "tipo": "Ahorros",
+    "moneda": "Soles",
+    "num": "200-3012345678",
+    "cci": "003-200-013012345678-41",
+    "titular": "Mente Serena SAC",
+    "url": "https://interbank.pe",
+    "logo": ""
+   },
+   {
+    "id": "bbva",
+    "banco": "BBVA",
+    "tipo": "Ahorros",
+    "moneda": "Soles",
+    "num": "0011-0123-0201234567",
+    "cci": "011-123-000201234567-89",
+    "titular": "Mente Serena SAC",
+    "url": "https://www.bbva.pe",
+    "logo": ""
+   }
+  ],
   "adelantoTipo": "fijo",
   "adelantoValor": 50,
   "adelantoObligatorio": false,

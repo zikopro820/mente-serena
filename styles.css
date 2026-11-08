@@ -1235,3 +1235,21 @@ body.ej-open { overflow: hidden; }
 .sum-row.adl-row b { color: var(--sun); }
 .adl-okbox small { display: block; color: var(--muted); font-size: .8rem; margin-top: 2px; }
 @media (max-width: 640px) { .adl-qr { flex-direction: column; text-align: center; } .adl-qr img { width: 190px; height: 190px; } .adl-num { justify-content: center; } }
+
+/* ---- Transferencia bancaria ---- */
+.adl-tab.on.transferencia { background: var(--ink, #1f3a35); border-color: var(--ink, #1f3a35); color: #fff; }
+.adl-bk { background: #fff; border: 2px solid var(--line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.adl-bk > small, .adl-bk .bk-hint { color: var(--muted); font-size: .84rem; margin: 0; }
+.bk-logos { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 10px; margin: 4px 0; }
+.bk { border: 2px solid var(--line); background: #fff; border-radius: 14px; padding: 8px; height: 64px; display: grid; place-items: center; cursor: pointer; transition: transform .15s, border-color .15s, box-shadow .15s; }
+.bk:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.08); }
+.bk.on { border-color: var(--pri, #3d6b63); box-shadow: 0 0 0 3px rgba(61,107,99,.18); }
+.bk img { max-width: 100%; max-height: 44px; object-fit: contain; }
+.bk-mark { display: inline-flex; align-items: center; gap: 6px; background: var(--b1); color: #fff; font-weight: 800; font-size: .95rem; letter-spacing: .02em; padding: 7px 12px; border-radius: 9px; white-space: nowrap; }
+.bk-mark i { width: 10px; height: 10px; border-radius: 50%; background: var(--b2); box-shadow: 0 0 0 2px rgba(255,255,255,.7); }
+.bk-det { background: var(--soft, #f4f7f5); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.bk-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; }
+.bk-row span { grid-column: 1 / -1; color: var(--muted); font-size: .8rem; }
+.bk-row b { font-size: 1.02rem; letter-spacing: .02em; word-break: break-all; }
+.bk-det small { color: var(--muted); font-size: .84rem; }
+.bk-ir { align-self: flex-start; text-decoration: none; }

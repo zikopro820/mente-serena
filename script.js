@@ -400,10 +400,15 @@ function iniciarCitas(servicios) {
   book.addEventListener("input", updateSum); book.addEventListener("change", updateSum);
 
   /* ---- Adelanto con Yape o Plin (el paciente elige) ---- */
-  const ADL = { si: false, met: "", img: "", ocr: null, leyendo: false };
+  const ADL = { si: false, met: "", banco: "", img: "", ocr: null, leyendo: false };
+  const BANCOS = { BCP: ["#0033a0", "#ff7800"], Interbank: ["#00a94f", "#0039a6"], BBVA: ["#072146", "#1973b8"], Scotiabank: ["#ec111a", "#9b0a10"], BanBif: ["#003b7a", "#e4002b"], Pichincha: ["#ffdd00", "#0f265c"] };
+  const cuentas = () => (Array.isArray(AJ.cuentas) ? AJ.cuentas : []).filter(c => c && c.banco && (c.num || c.cci));
+  const cuentaSel = () => cuentas().find(c => c.id === ADL.banco) || null;
+  const logoBanco = c => { const [c1, c2] = BANCOS[c.banco] || ["#3d6b63", "#c77b5d"];
+    return c.logo ? `<img src="${esc(c.logo)}" alt="${esc(c.banco)}">` : `<span class="bk-mark" style="--b1:${c1};--b2:${c2}"><i></i>${esc(c.banco)}</span>`; };
   const adlBox = document.createElement("div"); adlBox.id = "adlBox";
   $("[name=nombre]", book).closest(".f-grid").previousElementSibling.before(adlBox);
-  const metodos = () => [AJ.pagoYape !== false && AJ.yapeQR ? "Yape" : "", AJ.pagoPlin !== false && AJ.plinQR ? "Plin" : ""].filter(Boolean);
+  const metodos = () => [AJ.pagoYape !== false && AJ.yapeQR ? "Yape" : "", AJ.pagoPlin !== false && AJ.plinQR ? "Plin" : "", AJ.pagoTransf !== false && cuentas().length ? "Transferencia" : ""].filter(Boolean);
   const precioSel = () => +(($("input[name=servicio]:checked", book) || {}).dataset?.p || 0);
   const minAdl = () => { const p = precioSel(), v = +AJ.adelantoValor || 0, m = AJ.adelantoTipo === "porcentaje" ? Math.round(p * v / 100) : v; return p ? Math.min(m, p) : m; };
   const qrDe = m => m === "Plin" ? { qr: AJ.plinQR, num: AJ.plinNum, tit: AJ.plinTitular } : { qr: AJ.yapeQR, num: AJ.yapeNum, tit: AJ.yapeTitular };
@@ -412,19 +417,30 @@ function iniciarCitas(servicios) {
     if (!mets.length || !p || PAQ.usar) { adlBox.innerHTML = ""; ADL.si = false; return updateSum(); }
     if (!ADL.met || !mets.includes(ADL.met)) ADL.met = mets[0];
     if (AJ.adelantoObligatorio) ADL.si = true;
+    const tr = ADL.met === "Transferencia", cb = cuentaSel();
     const q = qrDe(ADL.met), min = minAdl(), monto = $("#adlMonto") ? $("#adlMonto").value : min;
     adlBox.innerHTML = `<span class="f-label">${AJ.adelantoObligatorio ? "Adelanto para reservar *" : "¿Quieres dejar un adelanto?"}</span>
-      ${AJ.adelantoObligatorio ? "" : `<div class="mods adl-op"><label class="mod"><input type="radio" name="adlOp" value="si" ${ADL.si ? "checked" : ""}><span>${ICO.check}<b>Adelantar ahora</b><small>Con ${mets.join(" o ")} · desde ${precio(min)}</small></span></label>
+      ${AJ.adelantoObligatorio ? "" : `<div class="mods adl-op"><label class="mod"><input type="radio" name="adlOp" value="si" ${ADL.si ? "checked" : ""}><span>${ICO.check}<b>Adelantar ahora</b><small>Con ${mets.join(", ").replace(/, ([^,]*)$/, " o $1")} · desde ${precio(min)}</small></span></label>
         <label class="mod"><input type="radio" name="adlOp" value="no" ${ADL.si ? "" : "checked"}><span>${icono("home")}<b>Pagar en el consultorio</b><small>${/online/i.test(($("input[name=modalidad]:checked", book) || {}).value || "") ? "O antes de tu sesión online" : "El día de tu cita"}</small></span></label></div>`}
       <div class="adl" ${ADL.si ? "" : "hidden"}>
-        ${mets.length > 1 ? `<div class="adl-tabs">${mets.map(m => `<button type="button" class="adl-tab ${m === ADL.met ? "on" : ""} ${m.toLowerCase()}" data-met="${m}">${m}</button>`).join("")}</div>` : ""}
-        <div class="adl-qr ${ADL.met.toLowerCase()}">
+        ${mets.length > 1 ? `<div class="adl-tabs">${mets.map(m => `<button type="button" class="adl-tab ${m === ADL.met ? "on" : ""} ${m.toLowerCase()}" data-met="${m}">${m === "Transferencia" ? "Transferencia" : m}</button>`).join("")}</div>` : ""}
+        ${tr ? `<div class="adl-bk">
+          <b>1. Elige tu banco y transfiere</b><small>Toca el logo de tu banco: copiamos el número de cuenta y te llevamos a su página para pagar.</small>
+          <div class="bk-logos">${cuentas().map(c => `<button type="button" class="bk ${cb && cb.id === c.id ? "on" : ""}" data-banco="${esc(c.id)}" aria-label="Pagar en ${esc(c.banco)}" title="Pagar en ${esc(c.banco)}">${logoBanco(c)}</button>`).join("")}</div>
+          ${cb ? `<div class="bk-det">
+            ${cb.num ? `<div class="bk-row"><span>Cuenta ${esc((cb.tipo || "").toLowerCase())} ${cb.moneda ? "en " + esc(cb.moneda.toLowerCase()) : ""} · ${esc(cb.banco)}</span><b>${esc(cb.num)}</b><button type="button" class="btn btn-light btn-sm" data-copynum="${esc(String(cb.num).replace(/\D/g, ""))}">Copiar</button></div>` : ""}
+            ${cb.cci ? `<div class="bk-row"><span>CCI · si pagas desde otro banco</span><b>${esc(cb.cci)}</b><button type="button" class="btn btn-light btn-sm" data-copynum="${esc(String(cb.cci).replace(/\D/g, ""))}">Copiar</button></div>` : ""}
+            <small>A nombre de <b>${esc(cb.titular || NOMBRE)}</b></small>
+            ${cb.url ? `<a class="btn btn-pri btn-sm bk-ir" href="${esc(cb.url)}" target="_blank" rel="noopener">Ir a ${esc(cb.banco)} para pagar ↗</a>` : ""}
+          </div>` : `<p class="bk-hint">👆 Elige el banco al que vas a transferir</p>`}
+          <p class="adl-note">${icono("clock")} Desde el mismo banco llega al instante. Desde otro banco (con CCI) puede tardar hasta el siguiente día hábil si no es transferencia inmediata.</p>
+        </div>` : `<div class="adl-qr ${ADL.met.toLowerCase()}">
           <img src="${esc(q.qr)}" alt="Código QR de ${ADL.met}">
           <div><b>1. Escanea el QR con ${ADL.met}</b><span>o ${ADL.met === "Plin" ? "plinea" : "yapea"} al número:</span><div class="adl-num"><b>${esc(q.num || "")}</b><button type="button" class="btn btn-light btn-sm" data-copynum="${esc(String(q.num || "").replace(/\D/g, ""))}">Copiar</button></div><small>A nombre de <b>${esc(q.tit || NOMBRE)}</b></small></div>
-        </div>
+        </div>`}
         <div class="f-grid adl-g">
           <label class="adl-l">2. ¿Cuánto adelantas? <small>(mínimo ${precio(min)} · total ${precio(p)})</small><input type="number" id="adlMonto" min="${min}" max="${p}" step="0.1" value="${esc(monto)}" inputmode="decimal"></label>
-          <label class="adl-l">3. Sube la captura del pago<span class="adl-up ${ADL.img ? "ok" : ""}"><input type="file" id="adlFile" accept="image/*">${ADL.img ? `<img src="${ADL.img}" alt="Captura del pago">` : `${icono("file")} Elegir imagen`}</span></label>
+          <label class="adl-l">3. Sube ${tr ? "la constancia de la transferencia" : "la captura del pago"}<span class="adl-up ${ADL.img ? "ok" : ""}"><input type="file" id="adlFile" accept="image/*">${ADL.img ? `<img src="${ADL.img}" alt="Captura del pago">` : `${icono("file")} Elegir imagen`}</span></label>
         </div>
         <div class="adl-ocr" id="adlOcr"></div>
         <label class="adl-l">Número de operación <small>(lo leemos de tu captura; corrígelo si hace falta)</small><input id="adlOp" maxlength="14" inputmode="numeric" placeholder="Ej. 12345678" value="${esc((ADL.ocr && ADL.ocr.op) || "")}"></label>
@@ -468,6 +484,10 @@ function iniciarCitas(servicios) {
   });
   adlBox.addEventListener("input", e => { if (e.target.id === "adlMonto") { revisarOCR(); updateSum(); } });
   adlBox.addEventListener("click", e => { const t = e.target.closest("[data-met]"); if (t) { ADL.met = t.dataset.met; return pintarAdl(); }
+    const bk = e.target.closest("[data-banco]"); if (bk) { ADL.banco = bk.dataset.banco; const c = cuentaSel(); if (!c) return;
+      const n = String(c.num || c.cci || "").replace(/\D/g, ""); navigator.clipboard?.writeText(n).catch(() => {});
+      if (c.url) window.open(c.url, "_blank", "noopener");
+      toast(`Número de cuenta ${c.banco} copiado${c.url ? " · abriendo " + c.banco : ""}`); return pintarAdl(); }
     const c = e.target.closest("[data-copynum]"); if (c) { navigator.clipboard?.writeText(c.dataset.copynum).then(() => toast("Número copiado"), () => {}); } });
   book.addEventListener("change", e => { if (e.target.name === "servicio" || e.target.name === "modalidad" || e.target.id === "usarPaq") setTimeout(pintarAdl, 0); });
 
@@ -574,10 +594,11 @@ function iniciarCitas(servicios) {
       const monto = Math.round((+$("#adlMonto").value || 0) * 100) / 100, min = minAdl(), p = precioSel();
       const err = t => { msg.className = "f-msg err"; msg.textContent = t; adlBox.scrollIntoView({ behavior: "smooth", block: "center" }); };
       if (!(monto >= min) || monto > p) return err(`El adelanto debe ser entre ${precio(min)} y ${precio(p)}.`);
+      if (ADL.met === "Transferencia" && !cuentaSel()) return err("Elige el banco al que transferiste.");
       if (!ADL.img) return err("Sube la captura de tu pago para dejar el adelanto (o elige «Pagar en el consultorio»).");
       if (ADL.leyendo) return err("Espera un momento: estamos leyendo tu captura.");
       if (ADL.ocr && ADL.ocr.montos.length && !ADL.ocr.coincide && !($("#adlForzar") || {}).checked) return err("El monto no coincide con tu captura. Corrígelo o marca que tu captura es correcta.");
-      pago = { monto, metodo: ADL.met, operacion: ($("#adlOp").value || "").replace(/\D/g, "").slice(0, 14), captura: ADL.img,
+      pago = { monto, metodo: ADL.met, banco: ADL.met === "Transferencia" ? cuentaSel().banco : "", operacion: ($("#adlOp").value || "").replace(/\D/g, "").slice(0, 14), captura: ADL.img,
         montoLeido: ADL.ocr && ADL.ocr.montos.length ? ADL.ocr.montos[0] : null, montosLeidos: ADL.ocr ? ADL.ocr.montos.slice(0, 5) : [], coincide: ADL.ocr ? !!ADL.ocr.coincide : null, fechaOk: ADL.ocr ? ADL.ocr.fechaOk : null,
         estado: "por-validar", creado: new Date().toISOString() };
     }
@@ -589,7 +610,7 @@ function iniciarCitas(servicios) {
       origen: "web", estado: "confirmada", pagado: 0, estadoPago: "pendiente", creado: new Date().toISOString(),
     };
     if (PAQ.usar && PAQ.p && cita.code && cita.mascotaId) { cita.precio = 0; cita.paqueteId = PAQ.p.id; }
-    if (pago) { cita.adelantoPend = pago.monto; cita.adelantoMetodo = pago.metodo; cita.adelantoEstado = "por-validar";
+    if (pago) { cita.adelantoPend = pago.monto; cita.adelantoMetodo = pago.metodo + (pago.banco ? " " + pago.banco : ""); cita.adelantoEstado = "por-validar";
       Object.assign(pago, { code: cita.code, mascota: cita.mascota, dueno: cita.dueno, celular: cita.celular, servicio: cita.servicio, fecha: cita.fecha, hora: cita.hora, precio: cita.precio }); }
     btn.disabled = true; msg.className = "f-msg"; msg.textContent = "Reservando…";
     let id = null;
@@ -602,7 +623,7 @@ function iniciarCitas(servicios) {
     if (cita.preferencia) txt.push(`• Profesional de preferencia: ${cita.preferencia}`);
     if (cita.code) txt.push(`• Código de paciente: ${cita.code}`);
     if (cita.paqueteId) txt.push(`• Uso mi paquete: ${PAQ.p.t} (me quedarán ${PAQ.disp - 1} disponibles)`);
-    if (pago) txt.push(`• Adelanto: ${precio(pago.monto)} por ${pago.metodo}${pago.operacion ? " (operación " + pago.operacion + ")" : ""} · subí la captura en la web`);
+    if (pago) txt.push(`• Adelanto: ${precio(pago.monto)} por ${pago.metodo}${pago.banco ? " " + pago.banco : ""}${pago.operacion ? " (operación " + pago.operacion + ")" : ""} · subí la captura en la web`);
 
     book.hidden = true;
     const ok = $("#bookOk"); ok.hidden = false;
@@ -610,7 +631,7 @@ function iniciarCitas(servicios) {
       <div class="ok-box"><div><span>Servicio</span><b>${esc(cita.servicio)}</b></div><div><span>Modalidad</span><b>${esc(cita.modalidad)}</b></div><div><span>Fecha</span><b>${esc(nice(cita.fecha))}</b></div>
       <div><span>Hora</span><b>${esc(cita.hora)} h</b></div><div><span>Paciente</span><b>${esc(cita.mascota)}</b></div>
       <div><span>Precio</span><b>${cita.paqueteId ? "S/ 0 · incluida en tu paquete" : cita.precio ? precio(cita.precio) : "A consultar"}</b></div>
-      ${pago ? `<div class="full adl-okbox"><span>Adelanto</span><b>${precio(pago.monto)} por ${esc(pago.metodo)} · en validación</b><small>Recepción revisará tu captura y te confirmará por WhatsApp. Saldo a pagar: ${precio(Math.max(cita.precio - pago.monto, 0))}.</small></div>` : ""}
+      ${pago ? `<div class="full adl-okbox"><span>Adelanto</span><b>${precio(pago.monto)} por ${esc(pago.metodo)}${pago.banco ? " " + esc(pago.banco) : ""} · en validación</b><small>Recepción revisará tu captura y te confirmará por WhatsApp. Saldo a pagar: ${precio(Math.max(cita.precio - pago.monto, 0))}.</small></div>` : ""}
       <div class="full"><span>${cita.modalidad === "Online" ? "¿Cómo me conecto?" : "Te esperamos en"}</span><b>${cita.modalidad === "Online" ? "Te enviaremos el enlace de la videollamada por WhatsApp" + (cita.code ? " y aparecerá en Mi Espacio" : "") : esc(AJ.direccion)}</b></div></div>
       <p class="sub-ok">${cita.modalidad === "Online" ? "Busca un lugar privado y tranquilo, con buena conexión." : "Llega 10 minutos antes."} ${cita.code ? "También la verás en <b>Mi Espacio</b> con tu código." : "En tu primera sesión te daremos tu código para entrar a Mi Espacio."}</p>
       <div class="hero-actions"><button class="btn btn-pri" id="okWa">${ICO.check} Avisar por WhatsApp</button>${cita.code ? `<a class="btn btn-light" href="mi-espacio?codigo=${esc(cita.code)}">Ver en Mi Espacio</a>` : ""}<a class="btn btn-light" href="citas">Reservar otra</a></div>`;
