@@ -632,7 +632,7 @@ function iniciarCitas(servicios) {
       <div><span>Hora</span><b>${esc(cita.hora)} h</b></div><div><span>Paciente</span><b>${esc(cita.mascota)}</b></div>
       <div><span>Precio</span><b>${cita.paqueteId ? "S/ 0 · incluida en tu paquete" : cita.precio ? precio(cita.precio) : "A consultar"}</b></div>
       ${pago ? `<div class="full adl-okbox"><span>Adelanto</span><b>${precio(pago.monto)} por ${esc(pago.metodo)}${pago.banco ? " " + esc(pago.banco) : ""} · en validación</b><small>Recepción revisará tu captura y te confirmará por WhatsApp. Saldo a pagar: ${precio(Math.max(cita.precio - pago.monto, 0))}.</small></div>` : ""}
-      <div class="full"><span>${cita.modalidad === "Online" ? "¿Cómo me conecto?" : "Te esperamos en"}</span><b>${cita.modalidad === "Online" ? "Te enviaremos el enlace de la videollamada por WhatsApp" + (cita.code ? " y aparecerá en Mi Espacio" : "") : esc(AJ.direccion)}</b></div></div>
+      <div class="full"><span>${cita.modalidad === "Online" ? "¿Cómo me conecto?" : "Te esperamos en"}</span><b>${cita.modalidad === "Online" ? "Te enviaremos el enlace de tu sala por WhatsApp" + (cita.code ? " y en Mi Espacio verás el botón «Entrar a mi sesión» 10 minutos antes" : "") : esc(AJ.direccion)}</b></div></div>
       <p class="sub-ok">${cita.modalidad === "Online" ? "Busca un lugar privado y tranquilo, con buena conexión." : "Llega 10 minutos antes."} ${cita.code ? "También la verás en <b>Mi Espacio</b> con tu código." : "En tu primera sesión te daremos tu código para entrar a Mi Espacio."}</p>
       <div class="hero-actions"><button class="btn btn-pri" id="okWa">${ICO.check} Avisar por WhatsApp</button>${cita.code ? `<a class="btn btn-light" href="mi-espacio?codigo=${esc(cita.code)}">Ver en Mi Espacio</a>` : ""}<a class="btn btn-light" href="citas">Reservar otra</a></div>`;
     $("#okWa").addEventListener("click", () => wa(txt.join("\n")));
@@ -649,7 +649,7 @@ function iniciarCitas(servicios) {
    ========================================================= */
 const day = n => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + n); return d; };
 const isoN = n => isoD(day(n));
-const MEET = "https://meet.google.com/abc-defg-hij";
+const MEET = "https://meet.google.com/cam-ort-ega";
 const CLIENTES = {
   "MS-1024": { dueno: "Lucía Fernández", mascotas: [
     { id: "lucia", nombre: "Lucía Fernández", sexo: "Femenino", nac: isoN(-31 * 365), dni: "47851236", alergias: "Ninguna",
@@ -712,6 +712,14 @@ if (portal) {
     if (total && pagado >= total) return `<span class="st ok">Pagado ${soles(pagado)}</span>`;
     if (pagado > 0) return `<span class="st warn">Adelanto ${soles(pagado)} · Saldo ${soles(Math.max(total - pagado, 0))}</span>`;
     return total ? `<span class="st bad">Pago pendiente · ${soles(total)}</span>` : `<span class="st">Sin costo</span>`;
+  };
+  /* Botón de la videollamada: se activa 10 min antes y hasta 90 min después del inicio */
+  const joinHTML = (c, ini) => {
+    const falta = (ini - Date.now()) / 60000;
+    if (!c.enlace) return `<span class="join-wait">${icono("video")} Tu enlace aparecerá aquí antes de la sesión</span>`;
+    if (falta > 10) return `<span class="join-wait">${icono("video")} Tu sala está lista · el botón se activa 10 min antes${falta < 1440 ? ` (a las ${String(new Date(ini - 6e5).getHours()).padStart(2, "0")}:${String(new Date(ini - 6e5).getMinutes()).padStart(2, "0")})` : ""}</span>`;
+    if (falta < -90) return `<span class="join-wait">${icono("video")} La sesión ya terminó</span>`;
+    return `<a class="btn btn-white join-on" href="${esc(c.enlace)}" target="_blank" rel="noopener">${icono("video")} Entrar a mi sesión</a>`;
   };
   const pagoCita = c => c.adelantoEstado === "por-validar" ? `<span class="st warn">Adelanto ${soles(c.adelantoPend)} en revisión</span>`
     : c.adelantoEstado === "rechazado" ? `<span class="st bad">Adelanto no validado · escríbenos</span>` : pagoTxt(c.total, c.pagado, c.paquete);
@@ -824,14 +832,15 @@ if (portal) {
           ${+pr.total || +pr.pagado || pr.paquete || pr.adelantoEstado ? `<div class="pay-line">${pagoCita(pr)}</div>` : ""}</div>
         <div class="countdown" id="cd"></div>
         <div class="next-actions">
-          ${online ? (pr.enlace ? `<a class="btn btn-white" href="${esc(pr.enlace)}" target="_blank" rel="noopener">${icono("video")} Entrar a la videollamada</a>` : `<span class="join-wait">${icono("video")} El enlace aparecerá aquí antes de tu sesión</span>`) : ""}
+          ${online ? `<span id="joinBox"></span>` : ""}
           <button class="btn ${online ? "btn-glass" : "btn-white"}" data-act="confirmar">Confirmar asistencia</button>
           <button class="btn btn-glass" data-act="reprogramar">Reprogramar</button>
           <a class="btn btn-glass" href="citas?codigo=${encodeURIComponent(code)}">Agendar otra</a>
         </div>`;
       const [hh, mm] = String(pr.hora || "00:00").split(":"); const target = new Date(d); target.setHours(+hh, +mm);
       const tick = () => { let s = Math.max(0, Math.floor((target - Date.now()) / 1000)); const D = Math.floor(s / 86400); s %= 86400; const H = Math.floor(s / 3600); s %= 3600; const M = Math.floor(s / 60);
-        $("#cd").innerHTML = `<div><b>${D}</b><span>días</span></div><div><b>${H}</b><span>horas</span></div><div><b>${M}</b><span>min</span></div>`; };
+        $("#cd").innerHTML = `<div><b>${D}</b><span>días</span></div><div><b>${H}</b><span>horas</span></div><div><b>${M}</b><span>min</span></div>`;
+        const jb = $("#joinBox"); if (jb) jb.innerHTML = joinHTML(pr, target); };
       tick(); timer = setInterval(tick, 30000);
     } else {
       $("#nextBox").innerHTML = `<div><small>PRÓXIMA SESIÓN</small><h3>${esc(m.nombre.split(" ")[0])} no tiene sesiones programadas</h3><p>Agenda tu próxima sesión en menos de un minuto.</p></div>

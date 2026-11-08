@@ -1253,3 +1253,6 @@ body.ej-open { overflow: hidden; }
 .bk-row b { font-size: 1.02rem; letter-spacing: .02em; word-break: break-all; }
 .bk-det small { color: var(--muted); font-size: .84rem; }
 .bk-ir { align-self: flex-start; text-decoration: none; }
+.join-on { animation: joinPulse 1.6s ease-in-out infinite; }
+@keyframes joinPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,.55); } 50% { box-shadow: 0 0 0 8px rgba(255,255,255,0); } }
+@media (prefers-reduced-motion: reduce) { .join-on { animation: none; } }
